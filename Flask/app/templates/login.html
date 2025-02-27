@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso - eBookCypher</title>
+    
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/responsive.css') }}">
+    
+    <!-- Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        /* Estilos personalizados */
+        body {
+            background-image: url("{{ url_for('main.static', filename='cypher.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            background: rgba(47, 52, 55, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-logo img {
+            width: 150px;
+            height: auto;
+        }
+        
+        .login-form input {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            background: #3a3f42;
+            color: #fff;
+        }
+        
+        .login-form input::placeholder {
+            color: #999;
+        }
+        
+        .login-form button {
+            width: 100%;
+            padding: 12px;
+            background: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .login-form button:hover {
+            background: #0056b3;
+        }
+        
+        .login-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .login-links a {
+            color: #ddd;
+            text-decoration: none;
+            display: block;
+            margin: 5px 0;
+            transition: color 0.3s ease;
+        }
+        
+        .login-links a:hover {
+            color: #007bff;
+        }
+        
+        .back-to-site {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .back-to-site a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .back-to-site a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Contenedor principal -->
+    <div class="login-container">
+        <!-- Logo -->
+        <div class="login-logo">
+            <img src="{{ url_for('main.static', filename='images/logo.png') }}" alt="eBookCypher Logo">
+        </div>
+        
+        <!-- Mensajes de error/éxito -->
+        {% if mensaje %}
+        <div class="alert alert-{{ mensaje.tipo }} text-center">
+            {{ mensaje.texto }}
+        </div>
+        {% endif %}
+        
+        <!-- Formulario de login -->
+        <form class="login-form" method="POST" action="{{ url_for('main.login') }}">
+            <input type="text" name="usuario" placeholder="Usuario" required>
+            <input type="password" name="contraseña" placeholder="Contraseña" required>
+            <button type="submit">Ingresar</button>
+        </form>
+        
+        <!-- Enlaces adicionales -->
+        <div class="login-links">
+            <a href="#">¿Olvidaste tu contraseña?</a>
+            <a href="#">Registrar nueva cuenta</a>
+        </div>
+        
+        <!-- Volver al sitio -->
+        <div class="back-to-site">
+            <a href="{{ url_for('main.index') }}"><i class="fas fa-arrow-left"></i> Volver al sitio principal</a>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('main.static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

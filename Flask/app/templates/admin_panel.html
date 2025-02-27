@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Meta tags -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin Panel - eBookCypher</title>
+    
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/jquery.mCustomScrollbar.min.css') }}">
+    
+    <!-- Iconos y fuentes -->
+    <link rel="icon" href="{{ url_for('main.static', filename='images/fevicon.png') }}" type="image/gif" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        /* Estilos personalizados combinados */
+        .admin-wrapper {
+            min-height: 100vh;
+            background: #f8f9fa;
+            padding-top: 100px; /* Espacio para el header fijo */
+        }
+        
+        /* Header unificado */
+        header {
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header .logo img {
+            max-height: 60px;
+        }
+        
+        /* Sidebar ajustado */
+        .sidebar {
+            background: #2c3e50;
+            min-height: calc(100vh - 100px);
+            padding: 20px;
+            position: fixed;
+            width: 250px;
+            margin-top: 100px;
+        }
+        
+        /* Contenido principal */
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+            min-height: calc(100vh - 180px);
+            margin-top: 100px;
+        }
+        
+        /* Footer unificado */
+        footer {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            margin-left: 250px;
+        }
+        
+        /* Adaptación responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                margin-top: 0;
+                min-height: auto;
+            }
+            
+            .main-content,
+            footer {
+                margin-left: 0;
+            }
+            
+            .admin-wrapper {
+                padding-top: 160px; /* Más espacio para header móvil */
+            }
+        }
+        
+        /* Mantener estilos existentes del admin */
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .nav-link {
+            color: #ecf0f1 !important;
+            transition: all 0.3s;
+        }
+    </style>
+</head>
+<body class="main-layout position_head">
+    <!-- Loader -->
+    <div class="loader_bg">
+        <div class="loader"><img src="{{ url_for('main.static', filename='images/loading.gif') }}" alt="loading"></div>
+    </div>
+    
+    <!-- Header -->
+    <header>
+        <div class="header">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col logo_section">
+                        <div class="full">
+                            <div class="center-desk">
+                                <div class="logo">
+                                    <a href="{{ url_for('main.index') }}"><img src="{{ url_for('main.static', filename='images/logo.png') }}" alt="logo"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-9 col-lg-9 col-md-9 col-sm-9">
+                        <nav class="navigation navbar navbar-expand-md navbar-dark">
+                            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#adminNav">
+                                <span class="navbar-toggler-icon"></span>
+                            </button>
+                            <div class="collapse navbar-collapse" id="adminNav">
+                                <ul class="navbar-nav ml-auto">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ url_for('main.index') }}">Volver al Sitio</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Wrapper -->
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <nav>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('main.admin_panel') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-users"></i> Usuarios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-box"></i> Productos</a>
+                    </li>
+                    <li class="nav-item mt-4">
+                        <a class="nav-link btn btn-danger" href="{{ url_for('main.logout') }}"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sección de Bienvenida -->
+            <div class="welcome-section mb-4">
+                <h2>Bienvenido, <span class="text-primary">{{ usuario }}</span></h2>
+                <p class="lead">Panel de administración de eBookCypher</p>
+            </div>
+
+            <!-- Contenido del dashboard aquí -->
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h3>Usuarios Registrados</h3>
+                        <p class="display-6">1,234</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h3>Ventas Hoy</h3>
+                        <p class="display-6">$12,345</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <h3>Órdenes Pendientes</h3>
+                        <p class="display-6">15</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actividad reciente -->
+            <div class="mt-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">Actividad Reciente</h4>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Acción</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Ejemplo de datos -->
+                                <tr>
+                                    <td>usuario@ejemplo.com</td>
+                                    <td>Nuevo registro</td>
+                                    <td>2023-08-01</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <ul class="location_icon text-center">
+                            <li><a href="#"><i class="fa fa-map-marker"></i></a><br>Ubicación</li>
+                            <li><a href="#"><i class="fa fa-phone"></i></a><br>777 186 2023</li>
+                            <li><a href="#"><i class="fa fa-envelope"></i></a><br>Cypher@gmail.com</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12 text-center">
+                            <p>© 2023 eBookCypher. Todos los derechos reservados.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('main.static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='js/custom.js') }}"></script>
+</body>
+</html>

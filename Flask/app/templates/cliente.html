@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- basic -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- mobile metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <!-- site metas -->
+    <title>eBookCypher - Cliente</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- bootstrap css -->
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/bootstrap.min.css') }}">
+    <!-- style css -->
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/style.css') }}">
+    <!-- Responsive-->
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/responsive.css') }}">
+    <!-- fevicon -->
+    <link rel="icon" href="{{ url_for('main.static', filename='images/fevicon.png') }}" type="image/gif" />
+    <!-- Scrollbar Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/jquery.mCustomScrollbar.min.css') }}">
+    <!-- Tweaks for older IEs-->
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen">
+    <!-- Estilos para la sección de bienvenida -->
+    <style>
+        .welcome-section {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-top: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .welcome-message {
+            text-align: right;
+            font-size: 16px;
+            color: #343a40;
+        }
+        .welcome-message span {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .welcome-actions {
+            text-align: right;
+        }
+        .welcome-actions a {
+            margin-left: 15px;
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .welcome-actions a:hover {
+            color: #007bff;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="main-layout position_head">
+    <!-- loader  -->
+    <div class="loader_bg">
+        <div class="loader"><img src="{{ url_for('main.static', filename='images/loading.gif') }}" alt="#" /></div>
+    </div>
+    <!-- end loader -->
+    <!-- header -->
+    <header>
+        <!-- header inner -->
+        <div class="header">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col logo_section">
+                        <div class="full">
+                            <div class="center-desk">
+                                <div class="logo">
+                                    <a href="{{ url_for('main.index') }}"><img src="{{ url_for('main.static', filename='images/logo.png') }}" alt="#" /></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-9 col-lg-9 col-md-9 col-sm-9">
+                        <nav class="navigation navbar navbar-expand-md navbar-dark ">
+                            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                            </button>
+                            <div class="collapse navbar-collapse" id="navbarsExample04">
+                                <ul class="navbar-nav mr-auto">
+                                    <li class="nav-item ">
+                                        <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ url_for('main.about') }}">Conocenos</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="contact.html">Contactanos</a>
+                                    </li>
+                                    <li class="nav-item d_none sea_icon">
+                                        <a class="nav-link" href="#"><i class="fa fa-shopping-bag" aria-hidden="true"></i><i class="fa fa-search" aria-hidden="true"></i></a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- end header inner -->
+    <!-- end header -->
+
+    <!-- Inicio sección de bienvenida -->
+    {% if usuario %}
+    <div class="welcome-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="welcome-message">
+                        ¡Bienvenido(a), <span>{{ usuario }}</span>!
+                    </div>
+                    <div class="welcome-actions">
+                        <a href="#"><i class="fa fa-user"></i> Mi perfil</a>
+                        <a href="#"><i class="fa fa-shopping-cart"></i> Mis compras</a>
+                        <a href="{{ url_for('main.logout') }}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!-- Fin sección de bienvenida -->
+
+    <!-- Our  Glasses section -->
+    <div class="glasses">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-10 offset-md-1">
+                    <div class="titlepage">
+                        <h2>Nuestros Productos</h2>
+                        <p>
+                            Proteja lo que más le importa con Cypher, líder en videovigilancia. 
+                            Con tecnología de vanguardia, acceso remoto y alertas inteligentes, garantizamos su seguridad. 
+                            Instalación fácil, resistencia y soporte 24/7. Cypher: su tranquilidad, nuestra prioridad.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
+                    <div class="glasses_box">
+                        <figure><img src="{{ url_for('main.static', filename='images/glass1.png') }}" alt="#"/></figure>
+                        <h3><span class="blu">$</span>9,456</h3>
+                        <p>Ansice Gran Angular Cctv </p>
+                    </div>
+                </div>
+                <!-- Repite para los otros productos -->
+                <!-- ... -->
+            </div>
+        </div>
+    </div>
+    <!-- end Our  Glasses section -->
+    <!--  footer -->
+    <footer>
+        <div class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <ul class="location_icon">
+                            <li><a href=""><i class="fa fa-map-marker" aria-hidden="true"></i></a><br>Ubicacion</li>
+                            <li><a href=""><i class="fa fa-phone" aria-hidden="true"></i></a><br>777 186 2023</li>
+                            <li><a href=""><i class="fa fa-envelope" aria-hidden="true"></i></a><br>Cypher@gmail.com</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>© 2019 All Rights Reserved. Design by<a href="https://html.design/"> Free Html Templates</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- end footer -->
+    <!-- Javascript files-->
+    <script src="{{ url_for('main.static', filename='js/jquery.min.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='js/jquery-3.0.0.min.js') }}"></script>
+    <!-- sidebar -->
+    <script src="{{ url_for('main.static', filename='js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='js/custom.js') }}"></script>
+</body>
+</html>
