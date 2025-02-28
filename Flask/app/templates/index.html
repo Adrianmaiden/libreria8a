@@ -1,117 +1,147 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- Meta tags -->
+    <!-- basic -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- mobile metas -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="eBookCypher - Soluciones de seguridad avanzada">
-    <meta name="keywords" content="seguridad, cámaras, videovigilancia, Cypher">
-    <meta name="author" content="eBookCypher">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <!-- site metas -->
     <title>eBookCypher - Inicio</title>
-
-    <!-- Hojas de estilo -->
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- bootstrap css -->
     <link rel="stylesheet" href="{{ url_for('main.static', filename='css/bootstrap.min.css') }}">
+    <!-- style css -->
     <link rel="stylesheet" href="{{ url_for('main.static', filename='css/style.css') }}">
+    <!-- Responsive-->
     <link rel="stylesheet" href="{{ url_for('main.static', filename='css/responsive.css') }}">
+    <!-- fevicon -->
+    <link rel="icon" href="{{ url_for('main.static', filename='images/fevicon.png') }}" type="image/gif" />
+    <!-- Scrollbar Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('main.static', filename='css/jquery.mCustomScrollbar.min.css') }}">
-
-    <!-- Iconos y fuentes -->
-    <link rel="icon" href="{{ url_for('main.static', filename='images/fevicon.png') }}" type="image/gif">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css">
-
+    <!-- Tweaks for older IEs-->
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen">
     <!-- Estilos personalizados -->
     <style>
-        /* Mejoras generales */
-        body {
-            font-family: 'Overpass', sans-serif;
+        .welcome-section {
             background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-top: 10px;
+            border-bottom: 1px solid #e9ecef;
         }
-
-        .navbar {
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        .welcome-message {
+            text-align: right;
+            font-size: 16px;
+            color: #343a40;
         }
-
-        .carousel-item {
-            height: 80vh;
-            min-height: 400px;
-            background-size: cover;
-            background-position: center;
+        .welcome-message span {
+            font-weight: bold;
+            color: #007bff;
         }
-
-        .carousel-caption {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 30px;
-            border-radius: 10px;
+        .welcome-actions {
+            text-align: right;
         }
-
-        .section-title {
-            font-size: 2.5rem;
-            margin-bottom: 2rem;
-            color: #2c3e50;
+        .welcome-actions a {
+            margin-left: 15px;
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 14px;
         }
-
-        .feature-card {
-            transition: transform 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .testimonial-card {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            padding: 30px;
-            margin: 15px;
-        }
-
-        .contact-section {
-            background: #2c3e50;
-            color: #fff;
-            padding: 60px 0;
-        }
-
-        footer {
-            background: #34495e;
-            color: #fff;
+        .welcome-actions a:hover {
+            color: #007bff;
+            text-decoration: underline;
         }
     </style>
 </head>
-<body class="main-layout">
-    <!-- Loader -->
+<body class="main-layout position_head">
+    <!-- loader  -->
     <div class="loader_bg">
-        <div class="loader"><img src="{{ url_for('main.static', filename='images/loading.gif') }}" alt="loading"></div>
+        <div class="loader"><img src="{{ url_for('main.static', filename='images/loading.gif') }}" alt="#" /></div>
     </div>
-
-    <!-- Header -->
+    <!-- end loader -->
+    <!-- header -->
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-            <div class="container">
-                <a class="navbar-brand" href="{{ url_for('main.index') }}">
-                    <img src="{{ url_for('main.static', filename='images/logo.png') }}" alt="Logo" height="40">
-                </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.about') }}">Conócenos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.cliente') }}">Productos</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.login') }}">Iniciar Sesión</a>
-                        </li>
-                    </ul>
+        <!-- header inner -->
+        <div class="header">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-xl-3 col-lg-3 col-md-3 col-sm-3 col logo_section">
+                        <div class="full">
+                            <div class="center-desk">
+                                <div class="logo">
+                                    <a href="{{ url_for('main.index') }}"><img src="{{ url_for('main.static', filename='images/logo.png') }}" alt="#" /></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-9 col-lg-9 col-md-9 col-sm-9">
+                        <nav class="navigation navbar navbar-expand-md navbar-dark ">
+                            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample04" aria-controls="navbarsExample04" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                            </button>
+                            <div class="collapse navbar-collapse" id="navbarsExample04">
+                                <ul class="navbar-nav mr-auto">
+                                    <li class="nav-item ">
+                                        <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ url_for('main.about') }}">Conocenos</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ url_for('main.cliente') }}">Productos</a>
+                                    </li>
+                                    <li class="nav-item">
+                                       {% if not usuario %}
+                                       <a class="nav-link" href="{{ url_for('main.login') }}">Iniciar Sesión</a>
+                                       {% endif %}
+                                   </li>
+                                </ul>
+                            </div>
+                        </nav>
+                    </div>
                 </div>
             </div>
-        </nav>
+        </div>
     </header>
+    <!-- end header inner -->
+    <!-- end header -->
+
+    <!-- Inicio sección de bienvenida -->
+    {% if usuario %}
+    <div class="welcome-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="welcome-message">
+                        ¡Bienvenido(a), <span>{{ usuario }}</span>!
+                    </div>
+                    <div class="welcome-actions">
+                        <a href="{{ url_for('main.perfil') }}"><i class="fa fa-user"></i> Mi perfil</a>
+                        <a href="#"><i class="fa fa-shopping-cart"></i> Mis compras</a>
+                        <a href="{{ url_for('main.logout') }}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="welcome-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="welcome-message">
+                        <a href="{{ url_for('main.login') }}">Inicia sesión</a> o <a href="{{ url_for('main.registrar') }}">regístrate</a> para acceder a más funciones.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <!-- Fin sección de bienvenida -->
 
     <!-- Banner Principal -->
     <section class="banner_main">
@@ -122,22 +152,34 @@
                 <li data-target="#mainCarousel" data-slide-to="2"></li>
             </ol>
             <div class="carousel-inner">
-                <div class="carousel-item active" style="background-image: url('{{ url_for('main.static', filename='images/banner_img3.png') }}');">
-                    <div class="carousel-caption">
-                        <h1 class="display-4">Seguridad Inteligente</h1>
-                        <p class="lead">Protege lo que más te importa con tecnología de vanguardia</p>
+                <div class="carousel-item active">
+                    <div class="container">
+                        <div class="carousel-caption">
+                            <div class="text-bg">
+                                <h1> <span class="blu">Cypher  <br></span>Security</h1>
+                                <figure><img src="{{ url_for('main.static', filename='images/banner_img3.png') }}" alt="#" /></figure>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="carousel-item" style="background-image: url('{{ url_for('main.static', filename='images/banner_img.png') }}');">
-                    <div class="carousel-caption">
-                        <h1 class="display-4">Monitoreo 24/7</h1>
-                        <p class="lead">Acceso remoto desde cualquier dispositivo</p>
+                <div class="carousel-item">
+                    <div class="container">
+                        <div class="carousel-caption">
+                            <div class="text-bg">
+                                <h1> <span class="blu">Cypher  <br></span>Security</h1>
+                                <figure><img src="{{ url_for('main.static', filename='images/banner_img.png') }}" alt="#" /></figure>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="carousel-item" style="background-image: url('{{ url_for('main.static', filename='images/banner_img2.png') }}');">
-                    <div class="carousel-caption">
-                        <h1 class="display-4">Instalación Profesional</h1>
-                        <p class="lead">Soluciones personalizadas para cada necesidad</p>
+                <div class="carousel-item">
+                    <div class="container">
+                        <div class="carousel-caption">
+                            <div class="text-bg">
+                                <h1> <span class="blu">Cypher  <br></span>Security</h1>
+                                <figure><img src="{{ url_for('main.static', filename='images/banner_img2.png') }}" alt="#" /></figure>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -149,123 +191,60 @@
             </a>
         </div>
     </section>
+    <!-- end banner -->
 
-    <!-- Sección de Servicios -->
-    <section class="services py-5">
+    <!-- about section -->
+    <div class="about">
         <div class="container">
-            <h2 class="section-title text-center">Nuestros Servicios</h2>
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="card feature-card h-100">
-                        <div class="card-body">
-                            <i class="fas fa-camera fa-3x mb-3 text-primary"></i>
-                            <h3 class="card-title">Videovigilancia</h3>
-                            <p class="card-text">Sistemas de cámaras de alta definición con visión nocturna y detección de movimiento.</p>
-                        </div>
+            <div class="row d_flex">
+                <div class="col-md-5">
+                    <div class="about_img">
+                        <figure><img src="{{ url_for('main.static', filename='images/about_img.png') }}" alt="#" /></figure>
                     </div>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card feature-card h-100">
-                        <div class="card-body">
-                            <i class="fas fa-shield-alt fa-3x mb-3 text-primary"></i>
-                            <h3 class="card-title">Seguridad Integral</h3>
-                            <p class="card-text">Soluciones completas que incluyen alarmas, sensores y control de acceso.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card feature-card h-100">
-                        <div class="card-body">
-                            <i class="fas fa-headset fa-3x mb-3 text-primary"></i>
-                            <h3 class="card-title">Soporte 24/7</h3>
-                            <p class="card-text">Asistencia técnica permanente y mantenimiento preventivo.</p>
-                        </div>
+                <div class="col-md-7">
+                    <div class="titlepage">
+                        <h2>Antecedentes</h2>
+                        <p>La empresa Cypher Security es una empresa de nueva creación, con sede en Emiliano Zapata Morelos, su giro comercial es la venta e instalación de cámaras de video vigilancia, así como la asistencia técnica y mantenimiento de los mismos.</p>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+    <!-- about section -->
 
-    <!-- Sección de Testimonios -->
-    <section class="testimonials py-5 bg-light">
-        <div class="container">
-            <h2 class="section-title text-center">Lo que dicen nuestros clientes</h2>
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="testimonial-card">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="{{ url_for('main.static', filename='images/Han.png') }}" alt="Han Sunwoo" class="rounded-circle mr-3" width="60">
-                            <div>
-                                <h5>Han Sunwoo</h5>
-                                <small>Cliente Residencial</small>
-                            </div>
-                        </div>
-                        <p>"La claridad de imagen y la detección de movimiento me brindan tranquilidad. Cypher superó mis expectativas."</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="testimonial-card">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="{{ url_for('main.static', filename='images/chamber.png') }}" alt="Vincent Fabron" class="rounded-circle mr-3" width="60">
-                            <div>
-                                <h5>Vincent Fabron</h5>
-                                <small>Dueño de Negocio</small>
-                            </div>
-                        </div>
-                        <p>"Las cámaras Cypher son fáciles de instalar y resisten condiciones adversas. Muy satisfecho con la inversión."</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="testimonial-card">
-                        <div class="d-flex align-items-center mb-3">
-                            <img src="{{ url_for('main.static', filename='images/Mateo.png') }}" alt="Mateo Armendáriz" class="rounded-circle mr-3" width="60">
-                            <div>
-                                <h5>Mateo Armendáriz</h5>
-                                <small>Usuario Premium</small>
-                            </div>
-                        </div>
-                        <p>"La aplicación Cypher ha revolucionado mi forma de gestionar la seguridad. Calidad de imagen excepcional."</p>
+    <!--  footer -->
+    <footer>
+        <div class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-8 offset-md-2">
+                        <ul class="location_icon">
+                            <li><a href=""><i class="fa fa-map-marker" aria-hidden="true"></i></a><br>Ubicacion</li>
+                            <li><a href=""><i class="fa fa-phone" aria-hidden="true"></i></a><br>777 186 2023</li>
+                            <li><a href=""><i class="fa fa-envelope" aria-hidden="true"></i></a><br>Cypher@gmail.com</li>
+                        </ul>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="py-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h5>Sobre Nosotros</h5>
-                    <p>Cypher Security es líder en soluciones de videovigilancia y seguridad integral.</p>
+            <div class="copyright">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>© 2019 All Rights Reserved. Design by<a href="https://html.design/"> Free Html Templates</a></p>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <h5>Contacto</h5>
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-map-marker-alt"></i> Emiliano Zapata, Morelos</li>
-                        <li><i class="fas fa-phone"></i> 777 186 2023</li>
-                        <li><i class="fas fa-envelope"></i> Cypher@gmail.com</li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5>Enlaces Rápidos</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="{{ url_for('main.about') }}">Conócenos</a></li>
-                        <li><a href="{{ url_for('main.cliente') }}">Productos</a></li>
-                        <li><a href="{{ url_for('main.login') }}">Iniciar Sesión</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="text-center mt-4">
-                <p class="mb-0">© 2023 Cypher Security. Todos los derechos reservados.</p>
             </div>
         </div>
     </footer>
-
-    <!-- Scripts -->
+    <!-- end footer -->
+    <!-- Javascript files-->
     <script src="{{ url_for('main.static', filename='js/jquery.min.js') }}"></script>
     <script src="{{ url_for('main.static', filename='js/popper.min.js') }}"></script>
     <script src="{{ url_for('main.static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='js/jquery-3.0.0.min.js') }}"></script>
+    <!-- sidebar -->
     <script src="{{ url_for('main.static', filename='js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
     <script src="{{ url_for('main.static', filename='js/custom.js') }}"></script>
 </body>

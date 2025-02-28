@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/check-session')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.authenticated) {
+                        alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+                        window.location.href = '/login';
+                    }
+                });
+        });
+    </script>
     <!-- basic -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,7 +20,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <!-- site metas -->
-    <title>eBookCypher - Cliente</title>
+    <title>{{ libro.titulo }} - Detalles</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -25,61 +37,114 @@
     <!-- Tweaks for older IEs-->
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen">
-    <!-- Estilos para la sección de bienvenida -->
+    <!-- Estilos personalizados -->
     <style>
-        .welcome-section {
-            background-color: #f8f9fa;
-            padding: 20px 0;
-            margin-top: 10px;
-            border-bottom: 1px solid #e9ecef;
+        .libro-detalles {
+            margin-top: 50px;
         }
-        .welcome-message {
-            text-align: right;
-            font-size: 16px;
-            color: #343a40;
+        .libro-imagen {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
         }
-        .welcome-message span {
+        .libro-info {
+            padding: 20px;
+        }
+        .libro-info h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        .libro-info p {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .libro-info .precio {
+            font-size: 2rem;
+            color: #007bff;
             font-weight: bold;
-            color: #007bff;
         }
-        .welcome-actions {
-            text-align: right;
+        .review-box {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .welcome-actions a {
-            margin-left: 15px;
-            color: #6c757d;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        .welcome-actions a:hover {
-            color: #007bff;
-            text-decoration: underline;
-        }
-        .nuevo {
-            background-color: #28a745;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            position: absolute;
-            top: 10px;
-            left: 10px;
-        }
-        .rating {
-            color: #ffc107;
-            font-size: 14px;
-        }
-        .nuevo {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background-color: #ff5722;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 12px;
+
+        .review-title {
+        font-size: 1.5rem;
         font-weight: bold;
-        z-index: 1;
+        margin-bottom: 15px;
+        }
+
+        .review-stars {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        }
+
+        .review-count {
+        font-size: 1rem;
+        color: #666;
+        }
+
+        .average-stars {
+        font-size: 1.5rem;
+        color: #ffc107;
+        margin-top: 10px;
+        }
+
+        .bar-chart {
+        margin-top: 20px;
+        }
+
+        .bar-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        }
+
+        .bar-label {
+        width: 50px;
+        font-size: 1rem;
+        }
+
+        .bar-container {
+        flex-grow: 1;
+        height: 20px;
+        background-color: #e0e0e0;
+        border-radius: 10px;
+        margin: 0 10px;
+        overflow: hidden;
+        }
+
+        .bar {
+        height: 100%;
+        background-color: #007bff;
+        border-radius: 10px;
+        }
+
+        .bar-count {
+        width: 50px;
+        text-align: right;
+        font-size: 1rem;
+        }
+
+        .historial-calificaciones {
+        margin-top: 20px;
+        }
+
+        .historial-calificacion {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        }
+
+        .nombre_usuario {
+        font-weight: bold;
+        }
+
+        .valoracion {
+        color: #ffc107;
         }
     </style>
 </head>
@@ -158,67 +223,109 @@
     {% endif %}
     <!-- Fin sección de bienvenida -->
 
-    <!-- Our Glasses section -->
-    <div class="glasses">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-10 offset-md-1">
-                    <div class="titlepage">
-                        <h2>Nuestros Productos</h2>
-                        <p>
-                            Proteja lo que más le importa con Cypher, líder en videovigilancia.
-                            Con tecnología de vanguardia, acceso remoto y alertas inteligentes, garantizamos su seguridad.
-                            Instalación fácil, resistencia y soporte 24/7. Cypher: su tranquilidad, nuestra prioridad.
-                        </p>
+    <!-- Detalles del Libro -->
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <img src="{{ url_for('main.static', filename='images/libros/' + libro.titulo|slugify + '.jpg') }}" alt="{{ libro.titulo }}" class="img-fluid">
+            </div>
+            <div class="col-md-8">
+                <h2>{{ libro.titulo }}</h2>
+                <p><strong>Autor:</strong> {{ libro.autor }}</p>
+                <p><strong>Editorial:</strong> {{ libro.editorial }}</p>
+                <p><strong>Año de Publicación:</strong> {{ libro.anio_publicacion }}</p>
+                <p><strong>Precio:</strong> ${{ libro.precio }}</p>
+            </div>
+        </div>
+    </div>
+    <!-- end Detalles del Libro -->
+
+    <!-- Formulario de Calificación -->
+    <div class="container mt-5 calificar-libro-container">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Calificar Libro</h3>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('main.calificar_libro', id_libro=libro.id_libro) }}">
+                            <div class="form-group">
+                                <label for="valoracion">Calificación:</label>
+                                <select class="form-control" id="valoracion" name="valoracion" required>
+                                    <option value="1">★</option>
+                                    <option value="2">★★</option>
+                                    <option value="3">★★★</option>
+                                    <option value="4">★★★★</option>
+                                    <option value="5">★★★★★</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Calificar</button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="container-fluid">
-            <div class="row">
-                {% for libro in libros %}
-                <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
-                    <div class="glasses_box" style="position: relative;">
-                        {% if libro.es_nuevo %}
-                            <div class="nuevo">Nuevo</div>
-                        {% endif %}
-                        <a href="{{ url_for('main.ver_libro', id_libro=libro.id_libro) }}">
-                            <figure>
-                                <img src="{{ url_for('main.static', filename='images/libros/' + libro.titulo|slugify + '.jpg') }}" alt="{{ libro.titulo }}">
-                            </figure>
-                        </a>
-                        <h3><span class="blu">$</span>{{ libro.precio }}</h3>
-                        <p>{{ libro.titulo }}</p>
-                        <div class="rating">
-                            <span>★</span> {{ libro.promedio_calificacion }} ({% if libro.total_calificaciones > 0 %}{{ libro.total_calificaciones }} calificaciones{% else %}0 calificaciones{% endif %})
-                        </div>
+    </div>
+
+    <!-- Sección de Review -->
+<div class="container mt-5 review-section">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="review-box">
+                <div class="review-title">Calificación Total</div>
+                <div class="review-stars">
+                    <span>★</span> {{ libro.promedio_calificacion }}
+                </div>
+                <div class="review-count">
+                    ({% if libro.total_calificaciones > 0 %}{{ libro.total_calificaciones }} calificaciones{% else %}0 calificaciones{% endif %})
+                </div>
+                <div class="average-stars">
+                    {% for _ in range(5) %}
+                        <span class="star">★</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="bar-chart">
+                {% for calificacion in conteo_calificaciones %}
+                <div class="bar-item">
+                    <span class="bar-label">{{ calificacion.valoracion }} ★</span>
+                    <div class="bar-container">
+                        <div class="bar" style="width: {{ (calificacion.cantidad / libro.total_calificaciones) * 100 }}%;"></div>
                     </div>
+                    <span class="bar-count">({{ calificacion.cantidad }})</span>
                 </div>
                 {% endfor %}
             </div>
         </div>
     </div>
-    <!-- end Our Glasses section -->
-
-    <!-- Enlace a Contactanos -->
-    <div class="contact-link">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center">
-                    <a href="{{ url_for('main.contact') }}" class="btn btn-primary">Contactanos</a>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="review-box historial-calificaciones">
+                <div class="review-title">Historial de Calificaciones</div>
+                {% for calificacion in historial_calificaciones %}
+                <div class="historial-calificacion">
+                    <span class="nombre_usuario">{{ calificacion.nombre_usuario }}</span>
+                    <span class="valoracion">{% for _ in range(calificacion.valoracion) %}★{% endfor %}</span>
                 </div>
+                {% endfor %}
             </div>
         </div>
     </div>
+</div>
 
-    <!-- footer -->
+    <!--  footer -->
     <footer>
         <div class="footer">
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 offset-md-2">
                         <ul class="location_icon">
-                            <li><a href=""><i class="fa fa-map-marker" aria-hidden="true"></i></a><br>Ubicación</li>
+                            <li><a href=""><i class="fa fa-map-marker" aria-hidden="true"></i></a><br>Ubicacion</li>
                             <li><a href=""><i class="fa fa-phone" aria-hidden="true"></i></a><br>777 186 2023</li>
                             <li><a href=""><i class="fa fa-envelope" aria-hidden="true"></i></a><br>Cypher@gmail.com</li>
                         </ul>
@@ -237,29 +344,13 @@
         </div>
     </footer>
     <!-- end footer -->
-    <!-- JavaScript files-->
+    <!-- Javascript files-->
     <script src="{{ url_for('main.static', filename='js/jquery.min.js') }}"></script>
     <script src="{{ url_for('main.static', filename='js/popper.min.js') }}"></script>
     <script src="{{ url_for('main.static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('main.static', filename='js/jquery-3.0.0.min.js') }}"></script>
     <!-- sidebar -->
     <script src="{{ url_for('main.static', filename='js/jquery.mCustomScrollbar.concat.min.js') }}"></script>
     <script src="{{ url_for('main.static', filename='js/custom.js') }}"></script>
-
-    <!-- Script para verificar la sesión -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/check-session')
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.authenticated) {
-                        alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-                        window.location.href = '/login';
-                    }
-                });
-        });
-    </script>
 </body>
 </html>
-
-
-
