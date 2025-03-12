@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1">
     <!-- site metas -->
-    <title>eBookCypher - Editar Perfil</title>
+    <title>eBookCypher - Registro</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
     <meta name="author" content="">
@@ -94,6 +94,9 @@
                                         <a class="nav-link" href="{{ url_for('main.about') }}">Conocenos</a>
                                     </li>
                                     <li class="nav-item">
+                                        <a class="nav-link" href="{{ url_for('main.cliente') }}">Productos</a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a class="nav-link" href="{{ url_for('main.contact') }}">Contactanos</a>
                                     </li>
                                     <li class="nav-item d_none sea_icon">
@@ -111,68 +114,69 @@
     <!-- end header -->
 
     <!-- Inicio sección de bienvenida -->
-    {% if usuario %}
     <div class="welcome-section">
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
                     <div class="welcome-message">
-                        ¡Bienvenido(a), <span>{{ usuario.nombre_completo }}</span>!
-                    </div>
-                    <div class="welcome-actions">
-                        <a href="{{ url_for('main.perfil') }}"><i class="fa fa-user"></i> Ver Perfil</a>
-                        <a href="{{ url_for('main.logout') }}"><i class="fa fa-sign-out"></i> Cerrar sesión</a>
+                        ¡Bienvenido(a)!
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    {% endif %}
     <!-- Fin sección de bienvenida -->
 
-    <!-- Editar Perfil del Usuario -->
+    <!-- Formulario de Registro -->
     <div class="container mt-5">
         <div class="row">
-            <div class="col-md-8 offset-md-2">
+            <div class="col-md-6 offset-md-3">
                 <div class="card">
                     <div class="card-header">
-                        <h3>Editar Perfil</h3>
+                        <h3>Registro</h3>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ url_for('main.editar_perfil') }}">
+                        <form action="{{ url_for('main.registrar') }}" method="POST">
                             <div class="form-group">
-                                <label for="nombre_completo">Nombre Completo</label>
-                                <input type="text" class="form-control" id="nombre_completo" name="nombre_completo" value="{{ usuario.nombre_completo }}" required>
+                                <label for="nombre">Nombre Completo</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
                             </div>
                             <div class="form-group">
-                                <label for="correo">Correo</label>
-                                <input type="email" class="form-control" id="correo" name="correo" value="{{ usuario.correo }}" required>
+                                <label for="correo">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="correo" name="correo" required>
                             </div>
                             <div class="form-group">
                                 <label for="telefono">Teléfono</label>
-                                <input type="text" class="form-control" id="telefono" name="telefono" value="{{ usuario.telefono }}">
+                                <input type="text" class="form-control" id="telefono" name="telefono">
                             </div>
                             <div class="form-group">
                                 <label for="direccion">Dirección</label>
-                                <textarea class="form-control" id="direccion" name="direccion" rows="3" required>{{ usuario.direccion }}</textarea>
+                                <input type="text" class="form-control" id="direccion" name="direccion" required>
                             </div>
-                            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                            <div class="form-group">
+                                <label for="usuario">Nombre de Usuario</label>
+                                <input type="text" class="form-control" id="usuario" name="usuario" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="contraseña">Contraseña</label>
+                                <input type="password" class="form-control" id="contraseña" name="contraseña" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Registrar</button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- end Editar Perfil del Usuario -->
 
-    <!--  footer -->
+    <!-- footer -->
     <footer>
         <div class="footer">
             <div class="container">
                 <div class="row">
                     <div class="col-md-8 offset-md-2">
                         <ul class="location_icon">
-                            <li><a href=""><i class="fa fa-map-marker" aria-hidden="true"></i></a><br>Ubicacion</li>
+                            <li><a href=""><i class="fa fa-map-marker" aria-hidden="true"></i></a><br>Ubicación</li>
                             <li><a href=""><i class="fa fa-phone" aria-hidden="true"></i></a><br>777 186 2023</li>
                             <li><a href=""><i class="fa fa-envelope" aria-hidden="true"></i></a><br>Cypher@gmail.com</li>
                         </ul>
@@ -203,21 +207,5 @@
 
     <!-- Tu archivo custom.js local -->
     <script src="{{ url_for('main.static', filename='js/custom.js') }}"></script>
-
-    <!-- Script para verificar la sesión -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/check-session')
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.authenticated) {
-                        alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-                        window.location.href = '/login';
-                    }
-                });
-        });
-    </script>
 </body>
 </html>
-
-

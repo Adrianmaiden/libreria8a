@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Gestión de Libros</h1>
+    <a href="{{ url_for('admin.agregar_libro') }}" class="btn btn-primary mb-3">
+        <i class="fas fa-plus"></i> Agregar Libro
+    </a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for libro in libros %}
+            <tr>
+                <td>{{ libro.titulo }}</td>
+                <td>{{ libro.autor }}</td>
+                <td>${{ libro.precio }}</td>
+                <td>{{ libro.stock }}</td>
+                <td>
+                    <a href="{{ url_for('admin.editar_libro', id=libro.id_libro) }}" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <form action="{{ url_for('admin.eliminar_libro', id=libro.id_libro) }}" method="POST" class="d-inline">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

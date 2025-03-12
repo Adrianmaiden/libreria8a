@@ -3,9 +3,9 @@ import bcrypt
 
 # Configuración de conexión a MySQL
 db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'root',
+    'host': 'libreria-db.cztqrjvkhu8g.us-east-1.rds.amazonaws.com',
+    'user': 'admin',
+    'password': 'Str0ng3PassW0rD!',
     'database': 'libreria'
 }
 

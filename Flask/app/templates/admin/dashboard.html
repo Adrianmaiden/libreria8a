@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <!-- Sección de Bienvenida -->
+    <div class="welcome-section mb-4">
+        <h2>Bienvenido, <span class="text-primary">{{ usuario }}</span></h2>
+        <p class="lead">Panel de administración de eBookCypher</p>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="row">
+        <!-- Usuarios Registrados -->
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3>Usuarios Registrados</h3>
+                <p class="display-6">{{ total_usuarios }}</p>
+            </div>
+        </div>
+        <!-- Ventas Hoy -->
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3>Ventas Hoy</h3>
+                <p class="display-6">$12,345</p>
+            </div>
+        </div>
+        <!-- Órdenes Pendientes -->
+        <div class="col-md-4">
+            <div class="stat-card">
+                <h3>Órdenes Pendientes</h3>
+                <p class="display-6">15</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actividad Reciente -->
+    <div class="mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Actividad Reciente</h4>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Acción</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for actividad in actividades %}
+                        <tr>
+                            <td>{{ actividad.usuario }}</td>
+                            <td>{{ actividad.accion }}</td>
+                            <td>{{ actividad.fecha }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

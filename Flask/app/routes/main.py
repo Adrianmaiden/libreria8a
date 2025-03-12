@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, Blueprint, flash
 from datetime import datetime, timedelta
 import mysql.connector
+from mysql.connector import Error
 import os
 import bcrypt
 import re
@@ -32,62 +33,102 @@ def about():
 def glasses():
     return render_template("cliente.html")
 
-# Configuración de la conexión a MySQL
-db_config = {
+# Configuración de las bases de datos
+db_config_local = {
     'host': 'localhost',
     'user': 'root',
     'password': 'root',
     'database': 'libreria'
 }
 
-# Función para conectar a la base de datos
+db_config_rds = {
+    'host': 'libreria-db.cztqrjvkhu8g.us-east-1.rds.amazonaws.com',
+    'user': 'admin',
+    'password': 'Str0ng3PassW0rD!',
+    'database': 'libreria'
+}
+
+# Función para conectar a la base de datos con fallover
 def conectar_bd():
-    return mysql.connector.connect(**db_config)
-
-# Función para encriptar la contraseña antes de guardarla en la BD
-def encriptar_contraseña(contraseña):
-    return bcrypt.hashpw(contraseña.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-# Ruta para registrar un usuario (Cliente o Admin)
-@main.route('/registrar', methods=['POST'])
-def registrar():
-    nombre = request.form['nombre']
-    correo = request.form['correo']
-    telefono = request.form['telefono']
-    direccion = request.form['direccion']
-    rol = request.form['rol']
-    usuario = request.form['usuario']
-    contraseña = request.form['contraseña']
-
-    contraseña_encriptada = encriptar_contraseña(contraseña)
+    try:
+        # Intentar conectar a la base de datos local
+        connection = mysql.connector.connect(**db_config_local)
+        if connection.is_connected():
+            print("Conectado a la base de datos local.")
+            return connection
+    except Error as e:
+        print(f"Error al conectar a la base de datos local: {e}")
 
     try:
-        conn = conectar_bd()
-        cursor = conn.cursor()
+        # Si falla, intentar conectar a la base de datos en RDS
+        connection = mysql.connector.connect(**db_config_rds)
+        if connection.is_connected():
+            print("Conectado a la base de datos en RDS.")
+            return connection
+    except Error as e:
+        print(f"Error al conectar a la base de datos en RDS: {e}")
+        return None
 
-        cursor.execute("""
-            INSERT INTO Usuarios (nombre_completo, correo, telefono, direccion, rol)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (nombre, correo, telefono, direccion, rol))
+def encriptar_contraseña(contraseña):
+    # Genera un hash de la contraseña
+    hash_bytes = bcrypt.hashpw(contraseña.encode('utf-8'), bcrypt.gensalt())
+    # Convierte el hash a una cadena para almacenarlo en la base de datos
+    return hash_bytes.decode('utf-8')
 
-        id_usuario = cursor.lastrowid
+@main.route('/registrar', methods=['GET', 'POST'])
+def registrar():
+    if request.method == 'POST':
+        nombre = request.form.get('nombre')
+        correo = request.form.get('correo')
+        telefono = request.form.get('telefono')
+        direccion = request.form.get('direccion')
+        usuario = request.form.get('usuario')
+        contraseña = request.form.get('contraseña')
 
-        cursor.execute("""
-            INSERT INTO Credenciales (id_usuario, usuario, pass)
-            VALUES (%s, %s, %s)
-        """, (id_usuario, usuario, contraseña_encriptada))
+        if not nombre or not correo or not direccion or not usuario or not contraseña:
+            flash("Todos los campos son obligatorios", "danger")
+            return redirect(url_for('main.registrar'))
 
-        conn.commit()
-        flash("Usuario registrado correctamente.", "success")
-        return redirect(url_for('main.login'))
+        # Encriptar la contraseña
+        contraseña_encriptada = encriptar_contraseña(contraseña)
 
-    except mysql.connector.Error as e:
-        flash(f"Error: {e}", "danger")
-        return redirect(url_for('main.registrar'))
+        try:
+            conn = conectar_bd()
+            cursor = conn.cursor()
 
-    finally:
-        cursor.close()
-        conn.close()
+            # Insertar usuario en la tabla Usuarios
+            cursor.execute("""
+                INSERT INTO Usuarios (nombre_completo, correo, telefono, direccion, rol)
+                VALUES (%s, %s, %s, %s, 'Cliente')
+            """, (nombre, correo, telefono, direccion))
+
+            id_usuario = cursor.lastrowid
+
+            # Insertar credenciales en la tabla Credenciales
+            cursor.execute("""
+                INSERT INTO Credenciales (id_usuario, usuario, pass)
+                VALUES (%s, %s, %s)
+            """, (id_usuario, usuario, contraseña_encriptada))
+
+            conn.commit()
+            flash("Usuario registrado correctamente. <a href='/login'>Iniciar sesión</a>", "success")
+            return redirect(url_for('main.login'))
+
+        except mysql.connector.Error as e:
+            flash(f"Error: {e}", "danger")
+            return redirect(url_for('main.registrar'))
+
+        finally:
+            if 'cursor' in locals() and cursor is not None:
+                cursor.close()
+            if 'conn' in locals() and conn is not None:
+                conn.close()
+
+    return render_template('registrar.html')
+
+@main.route('/registro_exitoso')
+def registro_exitoso():
+    return render_template('registro_exitoso.html')
 
 @main.route('/cliente')
 def cliente():
@@ -125,8 +166,10 @@ def cliente():
             return redirect(url_for('main.cliente'))
 
         finally:
-            cursor.close()
-            conn.close()
+            if 'cursor' in locals() and cursor is not None:
+                cursor.close()
+            if 'conn' in locals() and conn is not None:
+                conn.close()
     return redirect(url_for('main.login'))
 
 @main.route('/calificar_libro/<int:id_libro>', methods=['POST'])
@@ -156,10 +199,10 @@ def calificar_libro(id_libro):
         return redirect(url_for('main.ver_libro', id_libro=id_libro))
 
     finally:
-        cursor.close()
-        conn.close()
-
-
+        if 'cursor' in locals() and cursor is not None:
+            cursor.close()
+        if 'conn' in locals() and conn is not None:
+            conn.close()
 
 @main.route('/perfil')
 def perfil():
@@ -190,8 +233,10 @@ def perfil():
         return redirect(url_for('main.perfil'))
 
     finally:
-        cursor.close()
-        conn.close()
+        if 'cursor' in locals() and cursor is not None:
+            cursor.close()
+        if 'conn' in locals() and conn is not None:
+            conn.close()
 
 @main.route('/editar_perfil', methods=['GET', 'POST'])
 def editar_perfil():
@@ -224,8 +269,10 @@ def editar_perfil():
             return redirect(url_for('main.editar_perfil'))
 
         finally:
-            cursor.close()
-            conn.close()
+            if 'cursor' in locals() and cursor is not None:
+                cursor.close()
+            if 'conn' in locals() and conn is not None:
+                conn.close()
 
     try:
         conn = conectar_bd()
@@ -250,8 +297,10 @@ def editar_perfil():
         return redirect(url_for('main.editar_perfil'))
 
     finally:
-        cursor.close()
-        conn.close()
+        if 'cursor' in locals() and cursor is not None:
+            cursor.close()
+        if 'conn' in locals() and conn is not None:
+            conn.close()
 
 @main.route('/libro/<int:id_libro>')
 def ver_libro(id_libro):
@@ -309,16 +358,10 @@ def ver_libro(id_libro):
         return redirect(url_for('main.cliente'))
 
     finally:
-        cursor.close()
-        conn.close()
-
-
-
-@main.route('/admin')
-def admin_panel():
-    if 'usuario' in session and session['rol'] == 'Admin':
-        return render_template('admin_panel.html')
-    return redirect(url_for('main.login'))
+        if 'cursor' in locals() and cursor is not None:
+            cursor.close()
+        if 'conn' in locals() and conn is not None:
+            conn.close()
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
@@ -344,9 +387,9 @@ def login():
                 session['rol'] = user_data['rol']
 
                 if user_data['rol'] == 'Admin':
-                    return redirect(url_for('main.admin_panel'))
+                    return redirect(url_for('admin.dashboard'))  # Redirigir al panel de administración
                 else:
-                    return redirect(url_for('main.cliente'))
+                    return redirect(url_for('main.cliente'))  # Redirigir al panel de cliente
             else:
                 flash('Credenciales incorrectas. Intenta de nuevo.', 'danger')
                 return render_template('login.html')
@@ -356,8 +399,10 @@ def login():
             return render_template('login.html')
 
         finally:
-            cursor.close()
-            conn.close()
+            if 'cursor' in locals() and cursor is not None:
+                cursor.close()
+            if 'conn' in locals() and conn is not None:
+                conn.close()
 
     return render_template('login.html')
 
