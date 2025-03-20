@@ -1,0 +1,79 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Stock-libros",
+    "version" : "2025-03-19T07:06:11Z"
+  },
+  "servers" : [ {
+    "url" : "https://vrl9zeztw9.execute-api.us-east-1.amazonaws.com/{basePath}",
+    "variables" : {
+      "basePath" : {
+        "default" : "prueba"
+      }
+    }
+  } ],
+  "paths" : {
+    "/stock" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options" : {
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Methods" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Access-Control-Allow-Headers" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Empty" : {
+        "title" : "Empty Schema",
+        "type" : "object"
+      }
+    }
+  }
+}

@@ -130,23 +130,49 @@
         font-size: 1rem;
         }
 
+        /* Estilos para el historial de calificaciones */
         .historial-calificaciones {
-        margin-top: 20px;
+            margin-top: 20px;
         }
 
         .historial-calificacion {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-        border-bottom: 1px solid #ddd;
+            display: flex;
+            flex-direction: column; /* Cambiamos a columna para que el comentario esté debajo */
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            background-color: #fff; /* Fondo blanco para cada comentario */
+            border-radius: 10px; /* Bordes redondeados */
+            margin-bottom: 10px; /* Espacio entre comentarios */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+        }
+
+        .calificacion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px; /* Espacio entre el header y el comentario */
         }
 
         .nombre_usuario {
-        font-weight: bold;
+            font-weight: bold;
+            font-size: 1.1rem; /* Tamaño de fuente un poco más grande */
         }
 
         .valoracion {
-        color: #ffc107;
+            color: #ffc107;
+            font-size: 1.2rem; /* Tamaño de fuente un poco más grande */
+        }
+
+        .comentario-container {
+            background-color: #f9f9f9; /* Fondo gris claro para el comentario */
+            padding: 10px;
+            border-radius: 5px; /* Bordes redondeados */
+        }
+
+        .comentario {
+            margin: 0;
+            font-size: 1rem;
+            color: #333; /* Color de texto oscuro */
         }
     </style>
 </head>
@@ -193,6 +219,24 @@
                                     <li class="nav-item d_none sea_icon">
                                         <a class="nav-link" href="#"><i class="fa fa-shopping-bag" aria-hidden="true"></i><i class="fa fa-search" aria-hidden="true"></i></a>
                                     </li>
+                                    <!-- En la sección del header, dentro de la lista de navegación -->
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownCarrito" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fa fa-shopping-cart"></i> Carrito ({{ session.get('carrito', [])|length }})
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownCarrito">
+                                            {% if session.get('carrito') %}
+                                                {% for item in session['carrito'] %}
+                                                    <li><a class="dropdown-item" href="#">{{ item.titulo }} ({{ item.cantidad }})</a></li>
+                                                {% endfor %}
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item" href="{{ url_for('main.ver_carrito') }}">Ver Carrito</a></li>
+                                                <li><a class="dropdown-item" href="#">Pagar</a></li>
+                                            {% else %}
+                                                <li><a class="dropdown-item" href="#">El carrito está vacío</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </li>
                                 </ul>
                             </div>
                         </nav>
@@ -231,12 +275,25 @@
             <div class="col-md-4">
                 <img src="{{ url_for('main.static', filename='images/libros/' + libro.titulo|slugify + '.jpg') }}" alt="{{ libro.titulo }}" class="img-fluid">
             </div>
+            <!-- Dentro de la sección de detalles del libro -->
+            <!-- Dentro de la sección de detalles del libro -->
             <div class="col-md-8">
                 <h2>{{ libro.titulo }}</h2>
                 <p><strong>Autor:</strong> {{ libro.autor }}</p>
                 <p><strong>Editorial:</strong> {{ libro.editorial }}</p>
                 <p><strong>Año de Publicación:</strong> {{ libro.anio_publicacion }}</p>
                 <p><strong>Precio:</strong> ${{ libro.precio }}</p>
+                <div class="mt-4">
+                    <form method="POST" action="{{ url_for('main.agregar_al_carrito', id_libro=libro.id_libro) }}">
+                        <div class="form-group">
+                            <label for="cantidad"><strong>Cantidad:</strong></label>
+                            <input type="number" class="form-control" id="cantidad" name="cantidad" value="1" min="1" style="width: 100px;">
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3">
+                            <i class="fa fa-cart-plus"></i> Añadir al carrito
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -245,7 +302,7 @@
     <!-- Formulario de Calificación -->
     <div class="container mt-5 calificar-libro-container">
         <div class="row">
-            <div class="col-md-6 offset-md-3">
+            <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
                         <h3>Calificar Libro</h3>
@@ -262,6 +319,10 @@
                                     <option value="5">★★★★★</option>
                                 </select>
                             </div>
+                            <div class="form-group">
+                                <label for="comentario">Comentario:</label>
+                                <textarea class="form-control" id="comentario" name="comentario" rows="3"></textarea>
+                            </div>
                             <button type="submit" class="btn btn-primary">Calificar</button>
                         </form>
                     </div>
@@ -271,54 +332,59 @@
     </div>
 
     <!-- Sección de Review -->
-<div class="container mt-5 review-section">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="review-box">
-                <div class="review-title">Calificación Total</div>
-                <div class="review-stars">
-                    <span>★</span> {{ libro.promedio_calificacion }}
+    <div class="container mt-5 review-section">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="review-box">
+                    <div class="review-title">Calificación Total</div>
+                    <div class="review-stars">
+                        <span>★</span> {{ libro.promedio_calificacion }}
+                    </div>
+                    <div class="review-count">
+                        ({% if libro.total_calificaciones > 0 %}{{ libro.total_calificaciones }} calificaciones{% else %}0 calificaciones{% endif %})
+                    </div>
+                    <div class="average-stars">
+                        {% for _ in range(5) %}
+                            <span class="star">★</span>
+                        {% endfor %}
+                    </div>
                 </div>
-                <div class="review-count">
-                    ({% if libro.total_calificaciones > 0 %}{{ libro.total_calificaciones }} calificaciones{% else %}0 calificaciones{% endif %})
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="bar-chart">
+                    {% for calificacion in conteo_calificaciones %}
+                    <div class="bar-item">
+                        <span class="bar-label">{{ calificacion.valoracion }} ★</span>
+                        <div class="bar-container">
+                            <div class="bar" style="width: {{ (calificacion.cantidad / libro.total_calificaciones) * 100 }}%;"></div>
+                        </div>
+                        <span class="bar-count">({{ calificacion.cantidad }})</span>
+                    </div>
+                    {% endfor %}
                 </div>
-                <div class="average-stars">
-                    {% for _ in range(5) %}
-                        <span class="star">★</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="review-box historial-calificaciones">
+                    <div class="review-title">Comentarios</div>
+                    {% for calificacion in historial_calificaciones %}
+                    <div class="historial-calificacion">
+                        <div class="calificacion-header">
+                            <span class="nombre_usuario">{{ calificacion.nombre_usuario }}</span>
+                            <span class="valoracion">{% for _ in range(calificacion.valoracion) %}★{% endfor %}</span>
+                        </div>
+                        <div class="comentario-container">
+                            <p class="comentario">{{ calificacion.comentario }}</p>
+                        </div>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="bar-chart">
-                {% for calificacion in conteo_calificaciones %}
-                <div class="bar-item">
-                    <span class="bar-label">{{ calificacion.valoracion }} ★</span>
-                    <div class="bar-container">
-                        <div class="bar" style="width: {{ (calificacion.cantidad / libro.total_calificaciones) * 100 }}%;"></div>
-                    </div>
-                    <span class="bar-count">({{ calificacion.cantidad }})</span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="review-box historial-calificaciones">
-                <div class="review-title">Historial de Calificaciones</div>
-                {% for calificacion in historial_calificaciones %}
-                <div class="historial-calificacion">
-                    <span class="nombre_usuario">{{ calificacion.nombre_usuario }}</span>
-                    <span class="valoracion">{% for _ in range(calificacion.valoracion) %}★{% endfor %}</span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
 
     <!--  footer -->
     <footer>

@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 import mysql.connector
 from mysql.connector import Error
 import bcrypt  # Importar bcrypt directamente
+from ..extensions import mail  # Importar mail desde extensions.py
 
 # Crear un Blueprint para las rutas de administración
 admin = Blueprint('admin', __name__, static_folder='static', template_folder='templates/admin')

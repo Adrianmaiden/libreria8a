@@ -6,6 +6,8 @@ import os
 import bcrypt
 import re
 import unicodedata
+from ..extensions import mail
+from flask_mail import Message  # Importar Message
 
 # Crear el Blueprint
 main = Blueprint('main', __name__, static_folder='static', template_folder='templates')
@@ -178,20 +180,21 @@ def calificar_libro(id_libro):
         return redirect(url_for('main.login'))
 
     valoracion = request.form['valoracion']
+    comentario = request.form['comentario']  # Obtener el comentario del formulario
     nombre_usuario = session['usuario']
 
     try:
         conn = conectar_bd()
         cursor = conn.cursor()
 
-        # Insertar calificación en la tabla Calificaciones
+        # Insertar calificación y comentario en la tabla Calificaciones
         cursor.execute("""
-            INSERT INTO Calificaciones (id_libro, id_usuario, valoracion, nombre_usuario)
-            VALUES (%s, %s, %s, %s)
-        """, (id_libro, session['id_usuario'], valoracion, nombre_usuario))
+            INSERT INTO Calificaciones (id_libro, id_usuario, valoracion, nombre_usuario, comentario)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (id_libro, session['id_usuario'], valoracion, nombre_usuario, comentario))
 
         conn.commit()
-        flash("Calificación enviada correctamente", "success")
+        flash("Calificación y comentario enviados correctamente", "success")
         return redirect(url_for('main.ver_libro', id_libro=id_libro))
 
     except mysql.connector.Error as e:
@@ -203,6 +206,201 @@ def calificar_libro(id_libro):
             cursor.close()
         if 'conn' in locals() and conn is not None:
             conn.close()
+
+@main.route('/agregar_al_carrito/<int:id_libro>', methods=['POST'])
+def agregar_al_carrito(id_libro):
+    if 'usuario' not in session:
+        flash("Debes iniciar sesión para agregar libros al carrito", "danger")
+        return redirect(url_for('main.login'))
+
+    cantidad = int(request.form.get('cantidad', 1))
+
+    try:
+        conn = conectar_bd()
+        cursor = conn.cursor(dictionary=True)
+
+        # Obtener los detalles del libro
+        cursor.execute("SELECT * FROM Libros WHERE id_libro = %s", (id_libro,))
+        libro = cursor.fetchone()
+
+        if not libro:
+            flash("Libro no encontrado", "danger")
+            return redirect(url_for('main.cliente'))
+
+        # Inicializar el carrito en la sesión si no existe
+        if 'carrito' not in session:
+            session['carrito'] = []
+
+        # Verificar si el libro ya está en el carrito
+        libro_en_carrito = next((item for item in session['carrito'] if item['id_libro'] == id_libro), None)
+
+        if libro_en_carrito:
+            # Si el libro ya está en el carrito, actualizar la cantidad
+            libro_en_carrito['cantidad'] += cantidad
+        else:
+            # Si no está en el carrito, agregarlo
+            session['carrito'].append({
+                'id_libro': libro['id_libro'],
+                'titulo': libro['titulo'],
+                'precio': float(libro['precio']),
+                'cantidad': cantidad
+            })
+
+        flash(f"'{libro['titulo']}' agregado al carrito", "success")
+        return redirect(url_for('main.ver_libro', id_libro=id_libro))
+
+    except mysql.connector.Error as e:
+        flash(f"Error: {e}", "danger")
+        return redirect(url_for('main.cliente'))
+
+    finally:
+        if 'cursor' in locals() and cursor is not None:
+            cursor.close()
+        if 'conn' in locals() and conn is not None:
+            conn.close()
+
+@main.route('/ver_carrito')
+def ver_carrito():
+    if 'usuario' not in session:
+        flash("Debes iniciar sesión para ver el carrito", "danger")
+        return redirect(url_for('main.login'))
+
+    carrito = session.get('carrito', [])
+    total = sum(item['precio'] * item['cantidad'] for item in carrito)
+
+    return render_template('carrito.html', carrito=carrito, total=total)
+
+@main.route('/eliminar_del_carrito/<int:id_libro>')
+def eliminar_del_carrito(id_libro):
+    if 'usuario' not in session:
+        flash("Debes iniciar sesión para modificar el carrito", "danger")
+        return redirect(url_for('main.login'))
+
+    if 'carrito' in session:
+        session['carrito'] = [item for item in session['carrito'] if item['id_libro'] != id_libro]
+        flash("Libro eliminado del carrito", "success")
+
+    return redirect(url_for('main.ver_carrito'))
+
+@main.route('/actualizar_carrito/<int:id_libro>', methods=['POST'])
+def actualizar_carrito(id_libro):
+    if 'usuario' not in session:
+        flash("Debes iniciar sesión para modificar el carrito", "danger")
+        return redirect(url_for('main.login'))
+
+    nueva_cantidad = int(request.form.get('cantidad', 1))
+
+    if 'carrito' in session:
+        for item in session['carrito']:
+            if item['id_libro'] == id_libro:
+                item['cantidad'] = nueva_cantidad
+                flash("Cantidad actualizada", "success")
+                break
+
+    return redirect(url_for('main.ver_carrito'))
+
+@main.route('/procesar_pago', methods=['POST'])
+def procesar_pago():
+    print("Entrando a /procesar_pago")  # Depuración
+    if 'usuario' not in session:
+        print("Usuario no en sesión")  # Depuración
+        flash("Debes iniciar sesión para realizar una compra", "danger")
+        return redirect(url_for('main.login'))
+
+    # Obtener los datos del carrito
+    carrito = session.get('carrito', [])
+    print(f"Carrito: {carrito}")  # Depuración
+    if not carrito:
+        print("Carrito vacío")  # Depuración
+        flash("El carrito está vacío", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    # Obtener los datos del usuario
+    try:
+        conn = conectar_bd()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT nombre_completo, correo, telefono, direccion
+            FROM Usuarios
+            WHERE id_usuario = %s
+        """, (session['id_usuario'],))
+        usuario = cursor.fetchone()
+    except mysql.connector.Error as e:
+        print(f"Error al conectar a la base de datos: {e}")  # Depuración
+        flash(f"Error: {e}", "danger")
+        return redirect(url_for('main.ver_carrito'))
+    finally:
+        if 'cursor' in locals() and cursor is not None:
+            cursor.close()
+        if 'conn' in locals() and conn is not None:
+            conn.close()
+
+    if not usuario:
+        print("Usuario no encontrado")  # Depuración
+        flash("Usuario no encontrado", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    # Calcular el total de la compra
+    subtotal = sum(item['precio'] * item['cantidad'] for item in carrito)
+    envio = 59.00
+    total = subtotal + envio
+
+    # Generar el ticket de compra
+    ticket = f"""
+    Detalles de la Compra:
+    ----------------------
+    Cliente: {usuario['nombre_completo']}
+    Correo: {usuario['correo']}
+    Teléfono: {usuario['telefono']}
+    Dirección: {usuario['direccion']}
+    Método de Pago: Tarjeta de Crédito
+    Tipo de Envío: Entrega a Domicilio
+
+    Resumen de la Compra:
+    ---------------------
+    """
+
+    for item in carrito:
+        ticket += f"{item['titulo']} - {item['cantidad']} x ${item['precio']} = ${item['precio'] * item['cantidad']}\n"
+
+    ticket += f"""
+    Subtotal: ${subtotal}
+    Envío: ${envio}
+    Total: ${total}
+    """
+
+    # Enviar el ticket por correo al usuario y al administrador
+    try:
+        msg_usuario = Message(
+            subject="Confirmación de Compra",
+            recipients=[usuario['correo']],
+            body=ticket
+        )
+        mail.send(msg_usuario)
+
+        msg_admin = Message(
+            subject="Nueva Compra Realizada",
+            recipients=['20223tn150@utez.edu.mx'],  # Correo del administrador
+            body=ticket
+        )
+        mail.send(msg_admin)
+    except Exception as e:
+        print(f"Error al enviar el correo: {e}")  # Depuración
+        flash(f"Error al enviar el correo: {e}", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    # Limpiar el carrito después de la compra
+    session.pop('carrito', None)
+
+    # Redirigir a la página de "Compra Exitosa"
+    print("Redirigiendo a /compra_exitosa")  # Depuración
+    return redirect(url_for('main.compra_exitosa', ticket=ticket))
+
+@main.route('/compra_exitosa')
+def compra_exitosa():
+    ticket = request.args.get('ticket', 'No hay detalles disponibles.')
+    return render_template('compra_exitosa.html', ticket=ticket)
+
 
 @main.route('/perfil')
 def perfil():
@@ -321,7 +519,7 @@ def ver_libro(id_libro):
         libro = cursor.fetchone()
 
         if libro:
-            # Obtener calificaciones para el libro
+            # Obtener calificaciones y comentarios para el libro
             cursor.execute("""
                 SELECT AVG(valoracion) AS promedio, COUNT(*) AS total_calificaciones
                 FROM Calificaciones
@@ -331,9 +529,9 @@ def ver_libro(id_libro):
             libro['promedio_calificacion'] = calificacion['promedio'] if calificacion else 5.0
             libro['total_calificaciones'] = calificacion['total_calificaciones'] if calificacion else 0
 
-            # Obtener el historial de calificaciones
+            # Obtener el historial de calificaciones y comentarios
             cursor.execute("""
-                SELECT nombre_usuario, valoracion
+                SELECT nombre_usuario, valoracion, comentario
                 FROM Calificaciones
                 WHERE id_libro = %s
             """, (id_libro,))
@@ -362,6 +560,7 @@ def ver_libro(id_libro):
             cursor.close()
         if 'conn' in locals() and conn is not None:
             conn.close()
+
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
