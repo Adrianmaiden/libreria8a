@@ -207,6 +207,8 @@ def calificar_libro(id_libro):
         if 'conn' in locals() and conn is not None:
             conn.close()
 
+from flask import request, jsonify, session
+
 @main.route('/agregar_al_carrito/<int:id_libro>', methods=['POST'])
 def agregar_al_carrito(id_libro):
     if 'usuario' not in session:
@@ -214,6 +216,7 @@ def agregar_al_carrito(id_libro):
         return redirect(url_for('main.login'))
 
     cantidad = int(request.form.get('cantidad', 1))
+    origen = request.form.get('origen', 'cliente')  # Obtener la página de origen (cliente o detalle)
 
     try:
         conn = conectar_bd()
@@ -247,7 +250,12 @@ def agregar_al_carrito(id_libro):
             })
 
         flash(f"'{libro['titulo']}' agregado al carrito", "success")
-        return redirect(url_for('main.ver_libro', id_libro=id_libro))
+
+        # Redirigir según la página de origen
+        if origen == 'detalle':
+            return redirect(url_for('main.ver_libro', id_libro=id_libro))
+        else:
+            return redirect(url_for('main.cliente'))
 
     except mysql.connector.Error as e:
         flash(f"Error: {e}", "danger")
@@ -258,7 +266,7 @@ def agregar_al_carrito(id_libro):
             cursor.close()
         if 'conn' in locals() and conn is not None:
             conn.close()
-
+            
 @main.route('/ver_carrito')
 def ver_carrito():
     if 'usuario' not in session:
@@ -401,6 +409,15 @@ def compra_exitosa():
     ticket = request.args.get('ticket', 'No hay detalles disponibles.')
     return render_template('compra_exitosa.html', ticket=ticket)
 
+@main.route('/vaciar_carrito', methods=['POST'])
+def vaciar_carrito():
+    if 'carrito' in session:
+        session['carrito'] = []  # Vaciar el carrito
+        session.modified = True
+        flash("El carrito ha sido vaciado correctamente.", "success")
+    else:
+        flash("El carrito ya está vacío.", "info")
+    return redirect(url_for('main.ver_carrito'))
 
 @main.route('/perfil')
 def perfil():

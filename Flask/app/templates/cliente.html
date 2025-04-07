@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen">
     <!-- Estilos para la sección de bienvenida -->
     <style>
+        /* Estilos generales */
         .welcome-section {
             background-color: #f8f9fa;
             padding: 20px 0;
@@ -57,31 +58,113 @@
             color: #007bff;
             text-decoration: underline;
         }
-        .nuevo {
-            background-color: #28a745;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            position: absolute;
-            top: 10px;
-            left: 10px;
+    
+        /* Estilos para el contenedor de libros */
+        .libros-container {
+            max-width: 1400px; /* Aumentamos el ancho máximo del contenedor */
+            margin: 0 auto; /* Centrar el contenedor */
+            padding: 20px;
+        }
+    
+        /* Estilos para los libros */
+        .glasses_box {
+            position: relative;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+            background-color: #fff;
+            width: 200px; /* Ancho fijo para los contenedores */
+            padding: 10px; /* Reducir el padding interno */
+        }
+        .glasses_box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .glasses_box img {
+            width: 100%;
+            height: 150px; /* Altura fija para las imágenes */
+            object-fit: cover; /* Ajustar la imagen sin distorsionar */
+            border-bottom: 1px solid #e9ecef;
+        }
+        .glasses_box h3 {
+            font-size: 16px; /* Reducir el tamaño de la fuente */
+            margin: 8px 0; /* Reducir el margen */
+            color: #343a40;
+        }
+        .glasses_box p {
+            font-size: 12px; /* Reducir el tamaño de la fuente */
+            color: #6c757d;
+            margin: 4px 0; /* Reducir el margen */
         }
         .rating {
+            font-size: 12px; /* Reducir el tamaño de la fuente */
             color: #ffc107;
-            font-size: 14px;
+            margin: 4px 0; /* Reducir el margen */
         }
+    
+        /* Estilos para el botón "Nuevo" */
         .nuevo {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background-color: #ff5722;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-size: 12px;
-        font-weight: bold;
-        z-index: 1;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff5722;
+            color: white;
+            padding: 3px 8px; /* Reducir el padding */
+            border-radius: 5px;
+            font-size: 10px; /* Reducir el tamaño de la fuente */
+            font-weight: bold;
+            z-index: 1;
+        }
+    
+        /* Estilos para el botón de "Añadir al carrito" */
+        .add-to-cart {
+            margin-top: 8px; /* Reducir el margen superior */
+            padding: 8px; /* Reducir el padding */
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        .form-agregar-carrito {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Reducir el espacio entre elementos */
+        }
+        .cantidad-input {
+            width: 60px !important; /* Reducir el ancho del campo de cantidad */
+            padding: 4px; /* Reducir el padding */
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 12px; /* Reducir el tamaño de la fuente */
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 6px 12px; /* Reducir el padding */
+            font-size: 12px; /* Reducir el tamaño de la fuente */
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    
+        /* Estilos para los mensajes de retroalimentación */
+        .mensaje-carrito {
+            font-size: 12px; /* Reducir el tamaño de la fuente */
+            padding: 6px; /* Reducir el padding */
+            border-radius: 5px;
+            margin-top: 4px; /* Reducir el margen superior */
+            display: none; /* Oculto por defecto */
+        }
+        .mensaje-carrito.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .mensaje-carrito.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
@@ -183,17 +266,16 @@
             <div class="row">
                 <div class="col-md-10 offset-md-1">
                     <div class="titlepage">
-                        <h2>Nuestros Productos</h2>
+                        <h2>Nuestros Libros</h2>
                         <p>
-                            Proteja lo que más le importa con Cypher, líder en videovigilancia.
-                            Con tecnología de vanguardia, acceso remoto y alertas inteligentes, garantizamos su seguridad.
-                            Instalación fácil, resistencia y soporte 24/7. Cypher: su tranquilidad, nuestra prioridad.
+                            Explora nuestra amplia colección de libros. Desde los clásicos más destacados hasta las últimas novedades,
+                            tenemos algo para todos los gustos. Sumérgete en historias fascinantes y descubre nuevos mundos con nosotros.
                         </p>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="container-fluid">
+        <div class="libros-container">
             <div class="row">
                 {% for libro in libros %}
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6">
@@ -203,13 +285,28 @@
                         {% endif %}
                         <a href="{{ url_for('main.ver_libro', id_libro=libro.id_libro) }}">
                             <figure>
-                                <img src="{{ url_for('main.static', filename='images/libros/' + libro.titulo|slugify + '.jpg') }}" alt="{{ libro.titulo }}">
+                                <img src="{{ url_for('main.static', filename='images/libros/' + libro.titulo|slugify + '.jpg') }}" alt="{{ libro.titulo }}" class="img-fluid">
                             </figure>
                         </a>
                         <h3><span class="blu">$</span>{{ libro.precio }}</h3>
                         <p>{{ libro.titulo }}</p>
                         <div class="rating">
                             <span>★</span> {{ libro.promedio_calificacion }} ({% if libro.total_calificaciones > 0 %}{{ libro.total_calificaciones }} calificaciones{% else %}0 calificaciones{% endif %})
+                        </div>
+                        <!-- Botón de agregar al carrito -->
+                        <div class="add-to-cart mt-3">
+                            <form class="form-agregar-carrito" method="POST" action="{{ url_for('main.agregar_al_carrito', id_libro=libro.id_libro) }}">
+                                <input type="hidden" name="origen" value="cliente">
+                                <div class="form-group">
+                                    <label for="cantidad-{{ libro.id_libro }}"><strong>Cantidad:</strong></label>
+                                    <input type="number" class="form-control cantidad-input" id="cantidad-{{ libro.id_libro }}" name="cantidad" value="1" min="1" style="width: 100px;" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm">
+                                    <i class="fa fa-cart-plus"></i> Añadir al carrito
+                                </button>
+                            </form>
+                            <!-- Mensaje de retroalimentación -->
+                            <div id="mensaje-carrito-{{ libro.id_libro }}" class="mensaje-carrito mt-2" style="display: none;"></div>
                         </div>
                     </div>
                 </div>

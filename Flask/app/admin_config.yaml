@@ -1,0 +1,26 @@
+dashboard:
+  logout:
+    class: btn-danger
+    icon: sign-out-alt
+    position: fixed-bottom
+    text: Cerrar sesión
+    visible: true
+  menu:
+  - icon: tachometer-alt
+    name: Dashboard
+    order: 1
+    url: /admin/dashboard
+  - icon: book
+    name: Libros
+    order: 3
+    url: /admin/libros
+  - icon: users
+    name: Usuarios
+    order: 2
+    url: /admin/usuarios
+  - icon: cog
+    name: Configuración
+    order: 4
+    url: /admin/config-editor
+  title: Panel de Administración - eBookCypher
+  welcome_message: Gestión integral de tu librería digital

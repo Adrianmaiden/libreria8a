@@ -97,10 +97,35 @@
                                         <a class="nav-link" href="{{ url_for('main.cliente') }}">Productos</a>
                                     </li>
                                     <li class="nav-item">
+                                        <a class="nav-link" href="{{ url_for('main.contact') }}">Contactanos</a>
+                                    </li>
+                                    <li class="nav-item">
                                        {% if not usuario %}
                                        <a class="nav-link" href="{{ url_for('main.login') }}">Iniciar Sesión</a>
                                        {% endif %}
                                    </li>
+                                   {% if usuario %}
+                                   <li class="nav-item d_none sea_icon">
+                                        <a class="nav-link" href="#"><i class="fa fa-shopping-bag" aria-hidden="true"></i><i class="fa fa-search" aria-hidden="true"></i></a>
+                                    </li>
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownCarrito" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fa fa-shopping-cart"></i> Carrito ({{ session.get('carrito', [])|length }})
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownCarrito">
+                                            {% if session.get('carrito') %}
+                                                {% for item in session['carrito'] %}
+                                                    <li><a class="dropdown-item" href="#">{{ item.titulo }} ({{ item.cantidad }})</a></li>
+                                                {% endfor %}
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item" href="{{ url_for('main.ver_carrito') }}">Ver Carrito</a></li>
+                                                <li><a class="dropdown-item" href="#">Pagar</a></li>
+                                            {% else %}
+                                                <li><a class="dropdown-item" href="#">El carrito está vacío</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </li>
+                                    {% endif %}
                                 </ul>
                             </div>
                         </nav>

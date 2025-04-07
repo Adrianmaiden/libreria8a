@@ -1,11 +1,39 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session, current_app
 import mysql.connector
 from mysql.connector import Error
 import bcrypt  # Importar bcrypt directamente
 from ..extensions import mail  # Importar mail desde extensions.py
+import yaml
+import os
 
 # Crear un Blueprint para las rutas de administración
 admin = Blueprint('admin', __name__, static_folder='static', template_folder='templates/admin')
+
+# 1. Primero define la función de carga
+def load_admin_config():
+    """Carga la configuración desde admin_config.yaml"""
+    try:
+        config_path = os.path.join(os.path.dirname(__file__), '..', 'admin_config.yaml')
+        
+        if not os.path.exists(config_path):
+            current_app.logger.error(f"Archivo de configuración no encontrado: {config_path}")
+            return {}
+
+        with open(config_path, 'r', encoding='utf-8') as f:
+            config = yaml.safe_load(f)
+            return config if isinstance(config, dict) else {}
+
+    except Exception as e:
+        current_app.logger.error(f"Error cargando configuración: {str(e)}")
+        return {}
+
+# 2. Luego carga la configuración
+admin_config = load_admin_config()
+
+# 3. Context processor para hacer admin_config disponible en templates
+@admin.context_processor
+def inject_admin_config():
+    return {'admin_config': admin_config}
 
 # Configuración de las bases de datos
 db_config_local = {
@@ -24,6 +52,7 @@ db_config_rds = {
 
 # Función para conectar a la base de datos con fallover
 def conectar_bd():
+    connection = None
     try:
         # Intentar conectar a la base de datos local
         connection = mysql.connector.connect(**db_config_local)
@@ -42,41 +71,100 @@ def conectar_bd():
     except Error as e:
         print(f"Error al conectar a la base de datos en RDS: {e}")
         return None
+    
+from flask import request, flash, redirect, url_for
+import yaml
+from pathlib import Path
+
+@admin.route('/config-editor', methods=['GET', 'POST'])
+def config_editor():
+    if 'usuario' not in session or session.get('rol') != 'Admin':
+        flash('Acceso no autorizado', 'danger')
+        return redirect(url_for('main.login'))
+    
+    config_path = Path(__file__).parent.parent / 'admin_config.yaml'
+    
+    if request.method == 'POST':
+        try:
+            # Obtener los datos del formulario
+            new_config = {
+                'dashboard': {
+                    'title': request.form.get('dashboard_title'),
+                    'welcome_message': request.form.get('welcome_message'),
+                    'menu': [],
+                    'logout': {
+                        'visible': request.form.get('logout_visible') == 'on',
+                        'icon': request.form.get('logout_icon'),
+                        'text': request.form.get('logout_text'),
+                        'class': request.form.get('logout_class'),
+                        'position': request.form.get('logout_position')
+                    }
+                }
+            }
+            
+            # Procesar los ítems del menú
+            menu_items = request.form.getlist('menu_name[]')
+            for i, name in enumerate(menu_items):
+                new_config['dashboard']['menu'].append({
+                    'name': name,
+                    'icon': request.form.getlist('menu_icon[]')[i],
+                    'url': request.form.getlist('menu_url[]')[i],
+                    'order': int(request.form.getlist('menu_order[]')[i])
+                })
+            
+            # Escribir el archivo YAML
+            with open(config_path, 'w', encoding='utf-8') as f:
+                yaml.dump(new_config, f, allow_unicode=True)
+            
+            flash('Configuración actualizada correctamente', 'success')
+            return redirect(url_for('admin.config_editor'))
+        
+        except Exception as e:
+            flash(f'Error al guardar la configuración: {str(e)}', 'danger')
+    
+    # Cargar la configuración actual para mostrar en el formulario
+    with open(config_path, 'r', encoding='utf-8') as f:
+        current_config = yaml.safe_load(f) or {}
+    
+    return render_template('admin/config_editor.html', 
+                         config=current_config.get('dashboard', {}))
 
 @admin.route('/dashboard')
 def dashboard():
-    if 'usuario' in session and session['rol'] == 'Admin':
-        try:
-            conn = conectar_bd()
-            cursor = conn.cursor(dictionary=True)
+    if 'usuario' not in session or session.get('rol') != 'Admin':
+        flash('Debes iniciar sesión como administrador', 'danger')
+        return redirect(url_for('main.login'))
 
-            # Obtener estadísticas
+    try:
+        conn = conectar_bd()
+        if not conn:
+            raise Exception("Error de conexión a la base de datos")
+            
+        with conn.cursor(dictionary=True) as cursor:
             cursor.execute("SELECT COUNT(*) AS total_usuarios FROM Usuarios WHERE rol = 'Cliente'")
             total_usuarios = cursor.fetchone()['total_usuarios']
 
             cursor.execute("SELECT COUNT(*) AS total_libros FROM Libros")
             total_libros = cursor.fetchone()['total_libros']
 
-            # Renderizar la plantilla del dashboard con los datos obtenidos
-            return render_template('admin/dashboard.html',
-                                   usuario=session['usuario'],
-                                   total_usuarios=total_usuarios,
-                                   total_libros=total_libros)
+            ventas_hoy = 0
 
-        except mysql.connector.Error as e:
-            flash(f"Error de base de datos: {e}", "danger")
-            return render_template('admin/error.html', message="Error al cargar el dashboard")
+        # Cargar la configuración YAML
+        config_path = Path(__file__).parent.parent / 'admin_config.yaml'
+        with open(config_path, 'r', encoding='utf-8') as f:
+            admin_config = yaml.safe_load(f) or {}
 
-        finally:
-            if 'cursor' in locals():
-                cursor.close()
-            if 'conn' in locals():
-                conn.close()
-    else:
-        flash('Acceso no autorizado. Debes iniciar sesión como administrador.', 'danger')
-        return redirect(url_for('main.login'))
+        return render_template('admin/dashboard.html',
+                            usuario=session['usuario'],
+                            total_usuarios=total_usuarios,
+                            total_libros=total_libros,
+                            ventas_hoy=ventas_hoy,
+                            admin_config=admin_config)  # ¡Asegúrate de pasar esto!
 
-
+    except Exception as e:
+        current_app.logger.error(f"Error en dashboard: {str(e)}")
+        return render_template('admin/error.html',
+                            error_message="Error al cargar los datos del dashboard")
 
 # Ruta para la gestión de libros
 @admin.route('/libros')
@@ -511,7 +599,6 @@ def eliminar_usuario(id):
         return redirect(url_for('admin.usuarios'))
     return redirect(url_for('main.login'))
 
-# Ruta para cerrar sesión
 @admin.route('/logout')
 def logout():
     session.clear()

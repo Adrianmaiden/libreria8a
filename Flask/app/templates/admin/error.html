@@ -1,100 +1,13 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error - eBookCypher</title>
+{% extends "admin/base.html" %}
 
-    <!-- Hojas de estilo -->
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
-    <!-- Tus archivos personalizados (deben mantenerse locales) -->
-    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/responsive.css') }}">
-
-    <!-- Iconos -->
-    <!-- CDN de Font Awesome (versión actualizada) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        /* Estilos personalizados */
-        body {
-            background-image: url("{{ url_for('main.static', filename='libreria-login.jpg') }}");
-            background-size: cover;
-            background-position: center;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .error-container {
-            max-width: 400px;
-            width: 100%;
-            background: rgba(47, 52, 55, 0.9);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            text-align: center;
-        }
-
-        .error-logo {
-            margin-bottom: 30px;
-        }
-
-        .error-logo img {
-            width: 150px;
-            height: auto;
-        }
-
-        .error-message {
-            color: #fff;
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
-
-        .back-to-site {
-            margin-top: 20px;
-        }
-
-        .back-to-site a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .back-to-site a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <!-- Contenedor principal -->
-    <div class="error-container">
-        <!-- Logo -->
-        <div class="error-logo">
-            <img src="{{ url_for('main.static', filename='images/logo.png') }}" alt="eBookCypher Logo">
-        </div>
-
-        <!-- Mensaje de error -->
-        <div class="error-message">
-            <p>¡Ups! Ha ocurrido un error.</p>
-            <p>{{ mensaje }}</p> <!-- Mensaje dinámico del error -->
-        </div>
-
-        <!-- Volver al sitio -->
-        <div class="back-to-site">
-            <a href="{{ url_for('main.index') }}"><i class="fas fa-arrow-left"></i> Volver al sitio principal</a>
-        </div>
+{% block content %}
+<div class="container mt-4">
+    <div class="alert alert-danger">
+        <h4>Error Administrativo</h4>
+        <p>{{ error_message|default('Error desconocido') }}</p>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">
+            Volver al Dashboard
+        </a>
     </div>
-
-    <!-- Scripts -->
-    <!-- jQuery 3.7.1 -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-
-    <!-- Bootstrap 5 Bundle con Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-</body>
-</html>
+</div>
+{% endblock %}

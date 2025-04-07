@@ -1,0 +1,159 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mb-4">Editor de Configuración</h1>
+    
+    <form method="POST">
+        <!-- Configuración General -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5>Configuración General</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Título del Dashboard</label>
+                    <input type="text" class="form-control" name="dashboard_title" 
+                           value="{{ config.title|default('') }}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mensaje de Bienvenida</label>
+                    <input type="text" class="form-control" name="welcome_message" 
+                           value="{{ config.welcome_message|default('') }}">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Configuración de Logout -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5>Configuración de Logout</h5>
+            </div>
+            <div class="card-body">
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" name="logout_visible" 
+                           id="logout_visible" {% if config.logout.visible %}checked{% endif %}>
+                    <label class="form-check-label" for="logout_visible">
+                        Mostrar botón de logout
+                    </label>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Icono</label>
+                        <input type="text" class="form-control" name="logout_icon" 
+                               value="{{ config.logout.icon|default('sign-out-alt') }}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Texto</label>
+                        <input type="text" class="form-control" name="logout_text" 
+                               value="{{ config.logout.text|default('Cerrar sesión') }}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Clase CSS</label>
+                        <input type="text" class="form-control" name="logout_class" 
+                               value="{{ config.logout.class|default('btn-danger') }}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Posición</label>
+                        <select class="form-select" name="logout_position">
+                            <option value="fixed-bottom" {% if config.logout.position == 'fixed-bottom' %}selected{% endif %}>Fijo abajo</option>
+                            <option value="menu-item" {% if config.logout.position == 'menu-item' %}selected{% endif %}>Ítem de menú</option>
+                            <option value="sidebar-footer" {% if config.logout.position == 'sidebar-footer' %}selected{% endif %}>Pie de sidebar</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menú de Navegación -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5>Menú de Navegación</h5>
+            </div>
+            <div class="card-body">
+                <div id="menu-items-container">
+                    {% for item in config.menu %}
+                    <div class="menu-item border p-3 mb-3">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" class="form-control" name="menu_name[]" 
+                                       value="{{ item.name }}">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Icono</label>
+                                <input type="text" class="form-control" name="menu_icon[]" 
+                                       value="{{ item.icon }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">URL</label>
+                                <input type="text" class="form-control" name="menu_url[]" 
+                                       value="{{ item.url }}">
+                            </div>
+                            <div class="col-md-2 mb-3">
+                                <label class="form-label">Orden</label>
+                                <input type="number" class="form-control" name="menu_order[]" 
+                                       value="{{ item.order }}">
+                            </div>
+                            <div class="col-md-1 mb-3 d-flex align-items-end">
+                                <button type="button" class="btn btn-danger remove-item">Eliminar</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <button type="button" id="add-menu-item" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus"></i> Añadir Ítem de Menú
+                </button>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-success btn-lg">
+            <i class="fas fa-save"></i> Guardar Configuración
+        </button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Añadir nuevo ítem de menú
+    document.getElementById('add-menu-item').addEventListener('click', function() {
+        const container = document.getElementById('menu-items-container');
+        const newItem = document.createElement('div');
+        newItem.className = 'menu-item border p-3 mb-3';
+        newItem.innerHTML = `
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" class="form-control" name="menu_name[]" required>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Icono</label>
+                    <input type="text" class="form-control" name="menu_icon[]" value="circle">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">URL</label>
+                    <input type="text" class="form-control" name="menu_url[]" required>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Orden</label>
+                    <input type="number" class="form-control" name="menu_order[]" value="1">
+                </div>
+                <div class="col-md-1 mb-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger remove-item">Eliminar</button>
+                </div>
+            </div>
+        `;
+        container.appendChild(newItem);
+    });
+    
+    // Eliminar ítem de menú
+    document.addEventListener('click', function(e) {
+        if (e.target && e.target.classList.contains('remove-item')) {
+            e.target.closest('.menu-item').remove();
+        }
+    });
+});
+</script>
+{% endblock %}

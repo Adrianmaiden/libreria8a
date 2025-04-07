@@ -41,13 +41,150 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css" media="screen">
     <!-- Estilos personalizados -->
     <style>
+        /* Estilos generales */
+        .welcome-section {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-top: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .welcome-message {
+            text-align: right;
+            font-size: 16px;
+            color: #343a40;
+        }
+        .welcome-message span {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .welcome-actions {
+            text-align: right;
+        }
+        .welcome-actions a {
+            margin-left: 15px;
+            color: #6c757d;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .welcome-actions a:hover {
+            color: #007bff;
+            text-decoration: underline;
+        }
+    
+        /* Estilos para los libros */
+        .glasses_box {
+            position: relative;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+            background-color: #fff;
+            width: 200px; /* Ancho fijo para los contenedores */
+            padding: 10px; /* Reducir el padding interno */
+        }
+        .glasses_box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .glasses_box img {
+            width: 100%;
+            height: 150px; /* Altura fija para las imágenes */
+            object-fit: cover; /* Ajustar la imagen sin distorsionar */
+            border-bottom: 1px solid #e9ecef;
+        }
+        .glasses_box h3 {
+            font-size: 16px; /* Reducir el tamaño de la fuente */
+            margin: 8px 0; /* Reducir el margen */
+            color: #343a40;
+        }
+        .glasses_box p {
+            font-size: 12px; /* Reducir el tamaño de la fuente */
+            color: #6c757d;
+            margin: 4px 0; /* Reducir el margen */
+        }
+        .rating {
+            font-size: 12px; /* Reducir el tamaño de la fuente */
+            color: #ffc107;
+            margin: 4px 0; /* Reducir el margen */
+        }
+    
+        /* Estilos para el botón "Nuevo" */
+        .nuevo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff5722;
+            color: white;
+            padding: 3px 8px; /* Reducir el padding */
+            border-radius: 5px;
+            font-size: 10px; /* Reducir el tamaño de la fuente */
+            font-weight: bold;
+            z-index: 1;
+        }
+    
+        /* Estilos para el botón de "Añadir al carrito" */
+        .add-to-cart {
+            margin-top: 8px; /* Reducir el margen superior */
+            padding: 8px; /* Reducir el padding */
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+        }
+        .form-agregar-carrito {
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Reducir el espacio entre elementos */
+        }
+        .cantidad-input {
+            width: 60px !important; /* Reducir el ancho del campo de cantidad */
+            padding: 4px; /* Reducir el padding */
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 12px; /* Reducir el tamaño de la fuente */
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 6px 12px; /* Reducir el padding */
+            font-size: 12px; /* Reducir el tamaño de la fuente */
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    
+        /* Estilos para los mensajes de retroalimentación */
+        .mensaje-carrito {
+            font-size: 12px; /* Reducir el tamaño de la fuente */
+            padding: 6px; /* Reducir el padding */
+            border-radius: 5px;
+            margin-top: 4px; /* Reducir el margen superior */
+            display: none; /* Oculto por defecto */
+        }
+        .mensaje-carrito.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .mensaje-carrito.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    
+        /* Estilos para la sección de detalles del libro */
         .libro-detalles {
             margin-top: 50px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .libro-imagen {
             max-width: 100%;
             height: auto;
             border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .libro-info {
             padding: 20px;
@@ -55,124 +192,66 @@
         .libro-info h1 {
             font-size: 2.5rem;
             margin-bottom: 20px;
+            color: #343a40;
         }
         .libro-info p {
             font-size: 1.2rem;
             margin-bottom: 10px;
+            color: #555;
         }
         .libro-info .precio {
             font-size: 2rem;
             color: #007bff;
             font-weight: bold;
         }
-        .review-box {
-        background-color: #f9f9f9;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .review-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 15px;
-        }
-
-        .review-stars {
-        font-size: 1.2rem;
-        margin-bottom: 10px;
-        }
-
-        .review-count {
-        font-size: 1rem;
-        color: #666;
-        }
-
-        .average-stars {
-        font-size: 1.5rem;
-        color: #ffc107;
-        margin-top: 10px;
-        }
-
-        .bar-chart {
-        margin-top: 20px;
-        }
-
-        .bar-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 10px;
-        }
-
-        .bar-label {
-        width: 50px;
-        font-size: 1rem;
-        }
-
-        .bar-container {
-        flex-grow: 1;
-        height: 20px;
-        background-color: #e0e0e0;
-        border-radius: 10px;
-        margin: 0 10px;
-        overflow: hidden;
-        }
-
-        .bar {
-        height: 100%;
-        background-color: #007bff;
-        border-radius: 10px;
-        }
-
-        .bar-count {
-        width: 50px;
-        text-align: right;
-        font-size: 1rem;
-        }
-
-        /* Estilos para el historial de calificaciones */
-        .historial-calificaciones {
+    
+        /* Estilos para el formulario de "Añadir al carrito" en detalles */
+        .form-agregar-carrito-detalle {
             margin-top: 20px;
         }
-
-        .historial-calificacion {
-            display: flex;
-            flex-direction: column; /* Cambiamos a columna para que el comentario esté debajo */
-            padding: 15px;
-            border-bottom: 1px solid #ddd;
-            background-color: #fff; /* Fondo blanco para cada comentario */
-            border-radius: 10px; /* Bordes redondeados */
-            margin-bottom: 10px; /* Espacio entre comentarios */
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra suave */
+        .form-agregar-carrito-detalle .form-group {
+            margin-bottom: 15px;
         }
-
-        .calificacion-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px; /* Espacio entre el header y el comentario */
-        }
-
-        .nombre_usuario {
+        .form-agregar-carrito-detalle label {
+            font-size: 1.1rem;
             font-weight: bold;
-            font-size: 1.1rem; /* Tamaño de fuente un poco más grande */
+            color: #343a40;
         }
-
-        .valoracion {
-            color: #ffc107;
-            font-size: 1.2rem; /* Tamaño de fuente un poco más grande */
-        }
-
-        .comentario-container {
-            background-color: #f9f9f9; /* Fondo gris claro para el comentario */
-            padding: 10px;
-            border-radius: 5px; /* Bordes redondeados */
-        }
-
-        .comentario {
-            margin: 0;
+        .form-agregar-carrito-detalle input[type="number"] {
+            width: 100px;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
             font-size: 1rem;
-            color: #333; /* Color de texto oscuro */
+        }
+        .form-agregar-carrito-detalle .btn-primary {
+            background-color: #007bff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        .form-agregar-carrito-detalle .btn-primary:hover {
+            background-color: #0056b3;
+        }
+    
+        /* Estilos para la retroalimentación visual en detalles */
+        .mensaje-carrito-detalle {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1rem;
+            display: none; /* Oculto por defecto */
+        }
+        .mensaje-carrito-detalle.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .mensaje-carrito-detalle.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
     </style>
 </head>
@@ -270,29 +349,34 @@
     <!-- Fin sección de bienvenida -->
 
     <!-- Detalles del Libro -->
-    <div class="container mt-5">
+    <div class="container libro-detalles">
         <div class="row">
+            <!-- Columna de la imagen -->
             <div class="col-md-4">
-                <img src="{{ url_for('main.static', filename='images/libros/' + libro.titulo|slugify + '.jpg') }}" alt="{{ libro.titulo }}" class="img-fluid">
+                <img src="{{ url_for('main.static', filename='images/libros/' + libro.titulo|slugify + '.jpg') }}" alt="{{ libro.titulo }}" class="libro-imagen">
             </div>
-            <!-- Dentro de la sección de detalles del libro -->
-            <!-- Dentro de la sección de detalles del libro -->
-            <div class="col-md-8">
-                <h2>{{ libro.titulo }}</h2>
+            <!-- Columna de la información -->
+            <div class="col-md-8 libro-info">
+                <h1>{{ libro.titulo }}</h1>
                 <p><strong>Autor:</strong> {{ libro.autor }}</p>
                 <p><strong>Editorial:</strong> {{ libro.editorial }}</p>
                 <p><strong>Año de Publicación:</strong> {{ libro.anio_publicacion }}</p>
-                <p><strong>Precio:</strong> ${{ libro.precio }}</p>
-                <div class="mt-4">
+                <p class="precio">${{ libro.precio }}</p>
+
+                <!-- Formulario para agregar al carrito -->
+                <div class="form-agregar-carrito">
                     <form method="POST" action="{{ url_for('main.agregar_al_carrito', id_libro=libro.id_libro) }}">
+                        <input type="hidden" name="origen" value="detalle">
                         <div class="form-group">
                             <label for="cantidad"><strong>Cantidad:</strong></label>
-                            <input type="number" class="form-control" id="cantidad" name="cantidad" value="1" min="1" style="width: 100px;">
+                            <input type="number" class="form-control" id="cantidad" name="cantidad" value="1" min="1" required>
                         </div>
-                        <button type="submit" class="btn btn-primary mt-3">
+                        <button type="submit" class="btn btn-primary">
                             <i class="fa fa-cart-plus"></i> Añadir al carrito
                         </button>
                     </form>
+                    <!-- Mensaje de retroalimentación -->
+                    <div id="mensaje-carrito" class="mensaje-carrito"></div>
                 </div>
             </div>
         </div>

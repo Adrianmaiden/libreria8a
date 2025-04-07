@@ -1,0 +1,186 @@
+---
+site:
+  title: Librería Digital
+  description: Tu tienda de libros en línea
+  author: Equipo Librería
+  keywords: libros, lectura, literatura, compra libros
+  copyright: © 2023 Librería Digital. Todos los derechos reservados.
+navigation:
+  main_menu:
+    - name: Inicio
+      url: /
+      icon: fas fa-home
+    - name: Catálogo
+      url: /cliente
+      icon: fas fa-book
+    - name: Sobre Nosotros
+      url: /about
+      icon: fas fa-info-circle
+    - name: Contacto
+      url: /contact
+      icon: fas fa-envelope
+  user_menu:
+    - name: Mi Perfil
+      url: /perfil
+      icon: fas fa-user
+      require_login: true
+    - name: Mis Compras
+      url: "#"
+      icon: fas fa-shopping-bag
+      require_login: true
+    - name: Iniciar Sesión
+      url: /login
+      icon: fas fa-sign-in-alt
+      require_login: false
+    - name: Registrarse
+      url: /registrar
+      icon: fas fa-user-plus
+      require_login: false
+    - name: Cerrar Sesión
+      url: /logout
+      icon: fas fa-sign-out-alt
+      require_login: true
+pages:
+  index:
+    title: Bienvenido a nuestra librería
+    subtitle: Descubre los mejores títulos
+    featured_title: Libros destacados
+  about:
+    title: Sobre Nosotros
+    sections:
+      - title: Antecedentes
+        content: La innovadora empresa Cypher Security, surge como una respuesta
+          vanguardista en el ámbito de la videovigilancia. Especializada en la
+          venta e instalación de cámaras de alta tecnología, su compromiso
+          abarca no solo la seguridad inicial, sino también la asistencia
+          técnica y el mantenimiento continuo de los sistemas implementados.
+      - title: Expansión Online
+        content: En un esfuerzo por expandir su alcance y hacer que sus productos sean
+          más accesibles, Cypher Security ha decidido abrir una librería online.
+          Esta iniciativa permite a los clientes explorar y adquirir una amplia
+          gama de productos de videovigilancia desde la comodidad de sus
+          hogares.
+  contact:
+    title: Contacto
+    form:
+      name_label: Nombre completo
+      phone_label: Teléfono
+      email_label: Correo electrónico
+      message_label: Tu mensaje
+      submit_text: Enviar mensaje
+    success_message: ¡Gracias! Tu mensaje ha sido enviado correctamente.
+  login:
+    title: Iniciar Sesión
+    username_label: Usuario
+    password_label: Contraseña
+    remember_label: Recordar sesión
+    submit_text: Ingresar
+    register_text: ¿No tienes cuenta? Regístrate aquí
+  register:
+    title: Registro de Usuario
+    form_fields:
+      name_label: Nombre completo
+      email_label: Correo electrónico
+      phone_label: Teléfono
+      address_label: Dirección
+      username_label: Nombre de usuario
+      password_label: Contraseña
+      submit_text: Registrarse
+    success_message: ¡Registro exitoso! Ahora puedes iniciar sesión.
+  profile:
+    title: Mi Perfil
+    edit_button: Editar Perfil
+    fields:
+      name_label: Nombre
+      email_label: Correo
+      phone_label: Teléfono
+      address_label: Dirección
+      username_label: Usuario
+  edit_profile:
+    title: Editar Perfil
+    submit_text: Guardar Cambios
+    success_message: Perfil actualizado correctamente
+cart:
+  title: Tu Carrito de Compras
+  headers:
+    product: Producto
+    price: Precio
+    quantity: Cantidad
+    subtotal: Subtotal
+    actions: Acciones
+  buttons:
+    update: Actualizar
+    remove: Eliminar
+    checkout: Proceder al pago
+    empty: Vaciar carrito
+    continue: Seguir comprando
+  totals:
+    subtotal: Subtotal
+    shipping: Envío
+    total: Total a pagar
+  summary:
+    title: Resumen del pedido
+    shipping_notice: Envío estándar de 3-5 días hábiles
+  empty:
+    title: ¡Tu carrito está vacío!
+    message: Aún no has agregado ningún producto a tu carrito.
+    button_text: Explorar libros
+  checkout:
+    title: Finalizar Compra
+    payment_methods:
+      - name: Tarjeta de Crédito
+        value: credit_card
+      - name: PayPal
+        value: paypal
+    shipping_methods:
+      - name: Envío Estándar
+        value: standard
+        price: 59
+      - name: Envío Express
+        value: express
+        price: 99
+    submit_text: Confirmar Compra
+  success:
+    title: ¡Compra Exitosa!
+    message: Gracias por tu compra. Hemos enviado un correo con los detalles.
+    continue_text: Volver al catálogo
+books:
+  listing:
+    title: Nuestro Catálogo
+    new_label: Nuevo
+    rating_label: Valoración
+    details_button: Ver Detalles
+    add_to_cart: Añadir al Carrito
+  details:
+    author_label: Autor
+    category_label: Categoría
+    price_label: Precio
+    description_label: Descripción
+    rating_label: Valoración promedio
+    reviews_label: Reseñas
+    add_to_cart: Añadir al Carrito
+    quantity_label: Cantidad
+    reviews:
+      title: Opiniones de Clientes
+      no_reviews: Sé el primero en opinar sobre este libro
+      form:
+        title: Deja tu reseña
+        rating_label: Tu valoración
+        comment_label: Tu opinión
+        submit_text: Enviar Reseña
+contact_info:
+  email: contacto@libreria.com
+  phone: +52 55 1234 5678
+  address: Av. Libros 123, Col. Lectura, CDMX, 06700
+  business_hours: "Lunes a Viernes: 9:00 - 18:00 hrs"
+social_media:
+  facebook: https://facebook.com/libreria
+  twitter: https://twitter.com/libreria
+  instagram: https://instagram.com/libreria
+  whatsapp: https://wa.me/525512345678
+features:
+  enable_cart: true
+  enable_reviews: true
+  enable_user_profiles: true
+  show_ratings: true
+  new_product_threshold_hours: 48
