@@ -159,6 +159,12 @@
             font-size: 1rem;
             color: #333;
         }
+        .paypal-button {
+        transition: all 0.3s ease;
+        }
+        .paypal-button:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body class="main-layout position_head">
@@ -302,12 +308,22 @@
                         <p><strong>Envío:</strong> $59.00</p>
                         <hr>
                         <p><strong>Total (Incl. Impuestos):</strong> ${{ total + 59.00 }}</p>
-                        <form method="POST" action="{{ url_for('main.procesar_pago') }}">
-                            <button type="submit" class="btn btn-success btn-block">
-                                <i class="fa fa-credit-card"></i> Pagar
+                    
+                         <!-- Botón PayPal -->
+                        <form method="POST" action="{{ url_for('main.iniciar_pago_paypal') }}" class="mb-3">
+                            <button type="submit" class="btn btn-primary" style="background-color: #003087;">
+                                <i class="fab fa-paypal"></i> Pagar con PayPal
                             </button>
                         </form>
-                        <!-- Botón para vaciar el carrito -->
+
+                        <!-- Botón Tarjeta (simulado) -->
+                        <form method="POST" action="{{ url_for('main.procesar_pago') }}">
+                            <button type="submit" class="btn btn-success btn-block">
+                                <i class="fa fa-credit-card"></i> Pagar con Tarjeta
+                            </button>
+                        </form>
+
+                        <!-- Botón para vaciar carrito -->
                         <form method="POST" action="{{ url_for('main.vaciar_carrito') }}" class="mt-3">
                             <button type="submit" class="btn btn-danger btn-block">
                                 <i class="fa fa-trash"></i> Vaciar Carrito

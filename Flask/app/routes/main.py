@@ -3,11 +3,16 @@ from datetime import datetime, timedelta
 import mysql.connector
 from mysql.connector import Error
 import os
+import requests  # Para llamadas HTTP a PayPal
+import json  
 import bcrypt
 import re
 import unicodedata
 from ..extensions import mail
 from flask_mail import Message  # Importar Message
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Crear el Blueprint
 main = Blueprint('main', __name__, static_folder='static', template_folder='templates')
@@ -307,23 +312,130 @@ def actualizar_carrito(id_libro):
 
     return redirect(url_for('main.ver_carrito'))
 
-@main.route('/procesar_pago', methods=['POST'])
-def procesar_pago():
-    print("Entrando a /procesar_pago")  # Depuración
+@main.route('/iniciar_pago_paypal', methods=['POST'])
+def iniciar_pago_paypal():
+    """Inicia el proceso de pago con PayPal"""
     if 'usuario' not in session:
-        print("Usuario no en sesión")  # Depuración
         flash("Debes iniciar sesión para realizar una compra", "danger")
         return redirect(url_for('main.login'))
 
-    # Obtener los datos del carrito
     carrito = session.get('carrito', [])
-    print(f"Carrito: {carrito}")  # Depuración
     if not carrito:
-        print("Carrito vacío")  # Depuración
         flash("El carrito está vacío", "danger")
         return redirect(url_for('main.ver_carrito'))
 
-    # Obtener los datos del usuario
+    # Configuración PayPal
+    client_id = os.getenv('PAYPAL_CLIENT_ID')
+    client_secret = os.getenv('PAYPAL_CLIENT_SECRET')
+    base_url = "https://api.sandbox.paypal.com"  # Cambiar a 'live' en producción
+
+    # 1. Obtener token de acceso
+    auth_response = requests.post(
+        f"{base_url}/v1/oauth2/token",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        data={"grant_type": "client_credentials"},
+        auth=(client_id, client_secret))
+    
+    if auth_response.status_code != 200:
+        flash("Error al conectar con PayPal", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    access_token = auth_response.json()["access_token"]
+
+    # 2. Crear pago
+    subtotal = sum(item['precio'] * item['cantidad'] for item in carrito)
+    envio = 59.00
+    total = subtotal + envio
+
+    payment_data = {
+        "intent": "sale",
+        "payer": {"payment_method": "paypal"},
+        "redirect_urls": {
+            "return_url": url_for('main.paypal_confirmado', _external=True),
+            "cancel_url": url_for('main.ver_carrito', _external=True)
+        },
+        "transactions": [{
+            "amount": {
+                "currency": "MXN",
+                "total": "{0:.2f}".format(total),
+                "details": {
+                    "subtotal": "{0:.2f}".format(subtotal),
+                    "shipping": "{0:.2f}".format(envio)
+                }
+            },
+            "description": "Compra en eBookCypher"
+        }]
+    }
+
+    payment_response = requests.post(
+        f"{base_url}/v1/payments/payment",
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        },
+        data=json.dumps(payment_data))
+    
+    if payment_response.status_code != 201:
+        flash("Error al crear el pago con PayPal", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    # Guardar ID de pago en sesión
+    payment_info = payment_response.json()
+    session['paypal_payment_id'] = payment_info['id']
+
+    # Redirigir a PayPal
+    for link in payment_info['links']:
+        if link['rel'] == 'approval_url':
+            return redirect(link['href'])
+
+    flash("Error al redirigir a PayPal", "danger")
+    return redirect(url_for('main.ver_carrito'))
+
+@main.route('/paypal_confirmado')
+def paypal_confirmado():
+    """Confirmación después del pago exitoso en PayPal"""
+    payment_id = request.args.get('paymentId')
+    payer_id = request.args.get('PayerID')
+    
+    if not payment_id or not payer_id:
+        flash("Error en el proceso de pago", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    # Verificar que el payment_id coincide
+    if 'paypal_payment_id' not in session or session['paypal_payment_id'] != payment_id:
+        flash("ID de pago no válido", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    # Ejecutar el pago (confirmación final)
+    client_id = os.getenv('PAYPAL_CLIENT_ID')
+    client_secret = os.getenv('PAYPAL_CLIENT_SECRET')
+    base_url = "https://api.sandbox.paypal.com"
+
+    auth_response = requests.post(
+        f"{base_url}/v1/oauth2/token",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        data={"grant_type": "client_credentials"},
+        auth=(client_id, client_secret))
+    
+    if auth_response.status_code != 200:
+        flash("Error al verificar el pago", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    access_token = auth_response.json()["access_token"]
+
+    execute_response = requests.post(
+        f"{base_url}/v1/payments/payment/{payment_id}/execute",
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        },
+        data=json.dumps({"payer_id": payer_id}))
+    
+    if execute_response.status_code != 200:
+        flash("Error al completar el pago", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    # Obtener datos del usuario y carrito para el correo
     try:
         conn = conectar_bd()
         cursor = conn.cursor(dictionary=True)
@@ -333,9 +445,8 @@ def procesar_pago():
             WHERE id_usuario = %s
         """, (session['id_usuario'],))
         usuario = cursor.fetchone()
-    except mysql.connector.Error as e:
-        print(f"Error al conectar a la base de datos: {e}")  # Depuración
-        flash(f"Error: {e}", "danger")
+    except Exception as e:
+        flash(f"Error al obtener datos del usuario: {e}", "danger")
         return redirect(url_for('main.ver_carrito'))
     finally:
         if 'cursor' in locals() and cursor is not None:
@@ -344,16 +455,15 @@ def procesar_pago():
             conn.close()
 
     if not usuario:
-        print("Usuario no encontrado")  # Depuración
         flash("Usuario no encontrado", "danger")
         return redirect(url_for('main.ver_carrito'))
 
-    # Calcular el total de la compra
+    carrito = session.get('carrito', [])
     subtotal = sum(item['precio'] * item['cantidad'] for item in carrito)
     envio = 59.00
     total = subtotal + envio
 
-    # Generar el ticket de compra
+    # Generar ticket para el correo
     ticket = f"""
     Detalles de la Compra:
     ----------------------
@@ -361,7 +471,7 @@ def procesar_pago():
     Correo: {usuario['correo']}
     Teléfono: {usuario['telefono']}
     Dirección: {usuario['direccion']}
-    Método de Pago: Tarjeta de Crédito
+    Método de Pago: PayPal
     Tipo de Envío: Entrega a Domicilio
 
     Resumen de la Compra:
@@ -377,7 +487,94 @@ def procesar_pago():
     Total: ${total}
     """
 
-    # Enviar el ticket por correo al usuario y al administrador
+    # Enviar correos (igual que en procesar_pago)
+    try:
+        msg_usuario = Message(
+            subject="Confirmación de Compra (PayPal)",
+            recipients=[usuario['correo']],
+            body=ticket
+        )
+        mail.send(msg_usuario)
+
+        msg_admin = Message(
+            subject="Nueva Compra Realizada (PayPal)",
+            recipients=['20223tn150@utez.edu.mx'],
+            body=ticket
+        )
+        mail.send(msg_admin)
+    except Exception as e:
+        flash(f"Error al enviar el correo: {e}", "danger")
+
+    # Limpiar datos de PayPal y carrito de la sesión
+    session.pop('paypal_payment_id', None)
+    session.pop('carrito', None)
+
+    # Redirigir a pago_exitoso con el ticket
+    return redirect(url_for('main.compra_exitosa', ticket=ticket, metodo='PayPal'))
+
+@main.route('/procesar_pago', methods=['POST'])
+def procesar_pago():
+    if 'usuario' not in session:
+        flash("Debes iniciar sesión para realizar una compra", "danger")
+        return redirect(url_for('main.login'))
+
+    carrito = session.get('carrito', [])
+    if not carrito:
+        flash("El carrito está vacío", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    try:
+        conn = conectar_bd()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT nombre_completo, correo, telefono, direccion
+            FROM Usuarios
+            WHERE id_usuario = %s
+        """, (session['id_usuario'],))
+        usuario = cursor.fetchone()
+    except mysql.connector.Error as e:
+        flash(f"Error: {e}", "danger")
+        return redirect(url_for('main.ver_carrito'))
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conn' in locals():
+            conn.close()
+
+    if not usuario:
+        flash("Usuario no encontrado", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    # Calcular totales
+    subtotal = sum(item['precio'] * item['cantidad'] for item in carrito)
+    envio = 59.00
+    total = subtotal + envio
+
+    # Generar ticket
+    ticket = f"""
+    Detalles de la Compra:
+    ----------------------
+    Cliente: {usuario['nombre_completo']}
+    Correo: {usuario['correo']}
+    Teléfono: {usuario['telefono']}
+    Dirección: {usuario['direccion']}
+    Método de Pago: Tarjeta de Crédito (Simulado)
+    Tipo de Envío: Entrega a Domicilio
+
+    Resumen de la Compra:
+    ---------------------
+    """
+
+    for item in carrito:
+        ticket += f"{item['titulo']} - {item['cantidad']} x ${item['precio']} = ${item['precio'] * item['cantidad']}\n"
+
+    ticket += f"""
+    Subtotal: ${subtotal}
+    Envío: ${envio}
+    Total: ${total}
+    """
+
+    # Enviar correos
     try:
         msg_usuario = Message(
             subject="Confirmación de Compra",
@@ -388,26 +585,93 @@ def procesar_pago():
 
         msg_admin = Message(
             subject="Nueva Compra Realizada",
-            recipients=['20223tn150@utez.edu.mx'],  # Correo del administrador
+            recipients=['20223tn150@utez.edu.mx'],
             body=ticket
         )
         mail.send(msg_admin)
     except Exception as e:
-        print(f"Error al enviar el correo: {e}")  # Depuración
         flash(f"Error al enviar el correo: {e}", "danger")
-        return redirect(url_for('main.ver_carrito'))
 
-    # Limpiar el carrito después de la compra
+    # Limpiar carrito
     session.pop('carrito', None)
 
-    # Redirigir a la página de "Compra Exitosa"
-    print("Redirigiendo a /compra_exitosa")  # Depuración
-    return redirect(url_for('main.compra_exitosa', ticket=ticket))
+    return redirect(url_for('main.compra_exitosa', ticket=ticket, metodo='Tarjeta de Crédito (Simulado)'))
+
+@main.route('/pago_exitoso')
+def pago_exitoso():
+    # Obtener parámetros de la URL
+    ticket = request.args.get('ticket')
+    metodo = request.args.get('metodo', 'Método de pago no especificado')
+    
+    # Validar parámetros esenciales
+    if not ticket or not metodo:
+        flash("Error al procesar la información de la compra", "danger")
+        return redirect(url_for('main.ver_carrito'))
+
+    # Verificar autenticación del usuario
+    if 'usuario' not in session:
+        flash("Debes iniciar sesión para ver esta página", "danger")
+        return redirect(url_for('main.login'))
+
+    # Obtener datos adicionales del usuario desde la sesión
+    usuario_info = {
+        'nombre': session.get('usuario'),
+        'email': session.get('email'),
+        'direccion': session.get('direccion'),
+        'telefono': session.get('telefono')
+    }
+
+    try:
+        # Registrar la transacción en la base de datos
+        conn = conectar_bd()
+        cursor = conn.cursor()
+        
+        # Insertar en tabla de órdenes
+        cursor.execute("""
+            INSERT INTO Ordenes (id_usuario, total, metodo_pago, estado)
+            VALUES (%s, %s, %s, 'completado')
+        """, (session['id_usuario'], request.args.get('total'), metodo))
+        
+        orden_id = cursor.lastrowid
+        
+        # Insertar items de la orden
+        for item in session.get('carrito', []):
+            cursor.execute("""
+                INSERT INTO DetalleOrden (id_orden, id_libro, cantidad, precio_unitario)
+                VALUES (%s, %s, %s, %s)
+            """, (orden_id, item['id_libro'], item['cantidad'], item['precio']))
+        
+        conn.commit()
+
+    except Exception as e:
+        current_app.logger.error(f"Error al registrar la orden: {str(e)}")
+        flash("Error al registrar la transacción en la base de datos", "danger")
+        return redirect(url_for('main.ver_carrito'))
+    
+    finally:
+        if 'cursor' in locals() and cursor is not None:
+            cursor.close()
+        if 'conn' in locals() and conn is not None:
+            conn.close()
+
+    # Limpiar carrito después de mostrar el ticket
+    if metodo == 'Tarjeta de Crédito (Simulado)':
+        session.pop('carrito', None)
+
+    # Renderizar template con toda la información
+    return render_template('compra_exitosa.html',
+                         ticket=ticket,
+                         metodo_pago=metodo,
+                         usuario=usuario_info,
+                         fecha=datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+
 
 @main.route('/compra_exitosa')
 def compra_exitosa():
     ticket = request.args.get('ticket', 'No hay detalles disponibles.')
-    return render_template('compra_exitosa.html', ticket=ticket)
+    metodo = request.args.get('metodo', 'Método de pago no especificado')
+    return render_template('compra_exitosa.html', ticket=ticket, metodo_pago=metodo)
+
 
 @main.route('/vaciar_carrito', methods=['POST'])
 def vaciar_carrito():
